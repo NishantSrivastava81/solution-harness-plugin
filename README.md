@@ -1,0 +1,138 @@
+# Solution Harness — Copilot Agent Plugin
+
+A single-install plugin that provides everything you need to build, refactor, and maintain solutions with GitHub Copilot.
+
+## What's Included
+
+| Component | Count | Contents |
+|-----------|-------|----------|
+| **Agents** | 5 | planner, builder, evaluator, reviewer, janitor |
+| **Skills** | 13 | /init-solution, /onboard, /add-features, /refactor, /fix-issue, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check |
+| **Hooks** | 4 | SessionStart (inject status), Stop (enforce progress log), PreToolUse (block dangerous commands), PostToolUse (trajectory logging) |
+
+## Install
+
+### Option A: From Git URL
+In VS Code, run `Chat: Install Plugin From Source` from the Command Palette and enter the repo URL.
+
+### Option B: Local
+Clone this repo, then add to your VS Code settings:
+```json
+{
+  "chat.pluginLocations": {
+    "C:/path/to/solution-harness-plugin": true
+  }
+}
+```
+
+### Option C: Marketplace
+If published to a plugin marketplace, search `@agentPlugins` in the Extensions view.
+
+## Usage
+
+### New Project
+1. Open an empty folder in VS Code
+2. Switch to the **planner** agent
+3. Type `/init-solution Build a REST API for task management with user auth`
+4. The skill creates all workspace files: `docs/`, `AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/`
+5. Switch to **builder** agent → `/next-feature` → build → `/evaluate`
+
+### Existing Project
+1. Open your project in VS Code
+2. Switch to the **planner** agent
+3. Type `/onboard` — analyzes your codebase, generates all harness state files
+4. Then:
+   - `/add-features` to plan new capabilities
+   - `/refactor` to plan improvements
+   - `/fix-issue` to diagnose and fix bugs
+5. Switch to **builder** → `/next-feature` → build → `/evaluate`
+
+### Daily Workflow
+```
+/next-feature          → see what to build
+[switch to builder]    → implement it
+/pre-commit            → validate before committing
+/log-progress          → record what was done
+/evaluate              → quality check
+/status                → dashboard view
+```
+
+### Maintenance
+```
+[switch to janitor]    → detect drift, dead code, staleness
+/harness-health        → audit if harness components are still needed
+/architecture-check    → verify module boundaries
+```
+
+## Plugin Structure
+
+```
+solution-harness-plugin/
+├── plugin.json                          # Plugin manifest
+├── agents/
+│   ├── planner.agent.md                 # Idea → Plan
+│   ├── builder.agent.md                 # Plan → Code (one feature at a time)
+│   ├── evaluator.agent.md              # Code → Quality grade (skeptical)
+│   ├── reviewer.agent.md               # Security & architecture review
+│   └── janitor.agent.md                # Drift detection & cleanup
+├── skills/
+│   ├── init-solution/SKILL.md          # /init-solution — new project setup
+│   ├── onboard/SKILL.md               # /onboard — existing project setup
+│   ├── add-features/SKILL.md          # /add-features — plan new capabilities
+│   ├── refactor/SKILL.md              # /refactor — plan improvements
+│   ├── fix-issue/SKILL.md             # /fix-issue — diagnose & fix bugs
+│   ├── next-feature/SKILL.md          # /next-feature — what to build next
+│   ├── evaluate/SKILL.md             # /evaluate — quality evaluation
+│   ├── pre-commit/SKILL.md           # /pre-commit — validate before commit
+│   ├── status/SKILL.md               # /status — project dashboard
+│   ├── log-progress/SKILL.md         # /log-progress — record session progress
+│   ├── harness-health/SKILL.md       # /harness-health — harness self-assessment
+│   ├── testing/SKILL.md              # /testing — test patterns & runners
+│   └── architecture-check/SKILL.md   # /architecture-check — boundary verification
+├── hooks/
+│   └── hooks.json                     # Lifecycle hook configuration
+└── scripts/
+    ├── session-start.js               # Inject project status at session start
+    ├── session-stop.js                # Enforce progress logging before stop
+    ├── pre-tool-use.js                # Block dangerous terminal commands
+    └── post-tool-use.js               # Log agent trajectories
+```
+
+## What Gets Created in Your Workspace
+
+When you run `/init-solution` or `/onboard`, the skill creates workspace-specific files:
+
+```
+your-project/
+├── AGENTS.md                           # Table of contents for agents
+├── .github/
+│   ├── copilot-instructions.md         # Coding standards (always-on)
+│   └── instructions/
+│       ├── docs-protection.instructions.md
+│       └── test-standards.instructions.md
+├── docs/
+│   ├── IDEA.md                         # Original idea (immutable)
+│   ├── PLAN.md                         # Product specification
+│   ├── FEATURES.json                   # Feature tracking (session state)
+│   ├── PROGRESS.md                     # Append-only session log
+│   ├── ARCHITECTURE.md                 # Module boundaries & decisions
+│   └── trajectory.jsonl                # Agent action log (auto-captured)
+├── src/
+└── tests/
+```
+
+## Feature ID Conventions
+
+| Prefix | Use |
+|--------|-----|
+| `E` | Existing features (documented during /onboard) |
+| `F` | New features (/init-solution or /add-features) |
+| `R` | Refactoring tasks (/refactor) |
+| `B` | Bug fixes (/fix-issue) |
+
+
+## Requirements
+
+- VS Code with GitHub Copilot
+- Node.js (for hooks)
+- Git (recommended)
