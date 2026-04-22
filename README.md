@@ -6,7 +6,7 @@ A single-install plugin that provides everything you need to build, refactor, an
 
 | Component | Count | Contents |
 |-----------|-------|----------|
-| **Agents** | 6 | ideator, planner, builder, evaluator, reviewer, janitor |
+| **Agents** | 7 | ideator, planner, architect, builder, evaluator, reviewer, janitor |
 | **Skills** | 15 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check |
 | **Hooks** | 4 | SessionStart (inject status), Stop (enforce progress log), PreToolUse (block dangerous commands), PostToolUse (trajectory logging) |
 
@@ -33,10 +33,9 @@ If published to a plugin marketplace, search `@agentPlugins` in the Extensions v
 ### New Project
 1. Open an empty folder in VS Code
 2. **(Optional)** Switch to the **ideator** agent — brainstorm scope, research similar solutions, define MVP, produce docs/SPEC.md. Click **"Initialize Project from Spec"** when ready.
-3. Switch to the **planner** agent
-4. Type `/init-solution` (auto-detects docs/SPEC.md from ideation if it exists)
-4. The skill creates all workspace files: `docs/`, `AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/`
-5. Switch to **builder** agent → `/next-feature` → build → `/evaluate`
+3. Switch to the **planner** agent → `/init-solution`
+4. **(Recommended)** Switch to the **architect** agent — research tech stack, design data model, define module boundaries, establish cross-cutting patterns. Produces a thorough docs/ARCHITECTURE.md.
+5. Switch to **builder** agent → `/next-feature` → `/design-feature` → build → `/evaluate`
 
 ### Existing Project
 1. Open your project in VS Code
@@ -76,6 +75,7 @@ solution-harness-plugin/
 ├── agents/
 │   ├── ideator.agent.md                # Brainstorm & refine ideas before planning
 │   ├── planner.agent.md                 # Idea → Plan
+│   ├── architect.agent.md               # System-level architecture & tech decisions
 │   ├── builder.agent.md                 # Plan → Code (one feature at a time)
 │   ├── evaluator.agent.md              # Code → Quality grade (skeptical)
 │   ├── reviewer.agent.md               # Security & architecture review
