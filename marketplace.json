@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    {
+      "name": "solution-harness",
+      "description": "A complete harness for building solutions with GitHub Copilot — agents, skills, and hooks for planning, building, evaluating, reviewing, and maintaining code quality",
+      "version": "1.0.0",
+      "source": "."
+    }
+  ]
+}
