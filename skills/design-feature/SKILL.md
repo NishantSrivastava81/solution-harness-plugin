@@ -197,7 +197,10 @@ Summarize:
 - Key design decisions made and why
 - Libraries recommended
 - Any open questions that need human input
-- Tell the user to review the design doc, then switch to builder → /next-feature
+- Tell the user their options:
+  1. **Provide feedback**: Run `/refine-design` to request changes — the design will be revised and you can iterate as many rounds as needed
+  2. **Approve and build**: If the design looks good, tell me to approve it, then switch to builder → `/next-feature`
+  3. **Discuss a specific decision**: Ask about any particular choice to get a deeper explanation
 
 ## Rules
 - **Research before recommending** — don't suggest patterns you haven't verified are current

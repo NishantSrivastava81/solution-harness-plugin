@@ -7,7 +7,7 @@ A single-install plugin that provides everything you need to build, refactor, an
 | Component | Count | Contents |
 |-----------|-------|----------|
 | **Agents** | 5 | planner, builder, evaluator, reviewer, janitor |
-| **Skills** | 14 | /init-solution, /onboard, /add-features, /design-feature, /refactor, /fix-issue, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check |
+| **Skills** | 15 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check |
 | **Hooks** | 4 | SessionStart (inject status), Stop (enforce progress log), PreToolUse (block dangerous commands), PostToolUse (trajectory logging) |
 
 ## Install
@@ -52,6 +52,7 @@ If published to a plugin marketplace, search `@agentPlugins` in the Extensions v
 ```
 /next-feature          → see what to build
 /design-feature        → research patterns, create technical design
+/refine-design         → provide feedback, iterate on the design
 [switch to builder]    → implement it
 /pre-commit            → validate before committing
 /log-progress          → record what was done
@@ -82,6 +83,7 @@ solution-harness-plugin/
 │   ├── onboard/SKILL.md               # /onboard — existing project setup
 │   ├── add-features/SKILL.md          # /add-features — plan new capabilities
 │   ├── design-feature/SKILL.md       # /design-feature — research & design before building
+│   ├── refine-design/SKILL.md        # /refine-design — iterate on design with feedback
 │   ├── refactor/SKILL.md              # /refactor — plan improvements
 │   ├── fix-issue/SKILL.md             # /fix-issue — diagnose & fix bugs
 │   ├── next-feature/SKILL.md          # /next-feature — what to build next
