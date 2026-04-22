@@ -3,30 +3,34 @@
         "SessionStart": [
             {
                 "type": "command",
-                "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/session-start.js",
+                "command": "node -e \"const fs=require('fs');try{const f=JSON.parse(fs.readFileSync('docs/FEATURES.json','utf8'));const total=f.features.length;const done=f.features.filter(x=>x.status==='complete').length;const rework=f.features.filter(x=>x.status==='needs-rework').length;const blocked=f.features.filter(x=>x.status==='blocked').length;const existing=f.features.filter(x=>x.status==='existing').length;const active=total-existing;const next=f.features.find(x=>x.status==='needs-rework'||x.status==='not-started');process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'SessionStart',additionalContext:'PROJECT STATUS: '+done+'/'+active+' features complete ('+existing+' existing). '+rework+' need rework. '+blocked+' blocked. Next: '+(next?next.id+' - '+next.name:'ALL DONE')+'. Read docs/PROGRESS.md before starting.'}}));}catch(e){process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'SessionStart',additionalContext:'No docs/FEATURES.json found. Run /init-solution or /onboard first.'}}));}\"",
                 "timeout": 10
             }
         ],
         "Stop": [
             {
                 "type": "command",
-                "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/session-stop.js",
+                "command": "node -e \"const fs=require('fs');try{const mt=fs.statSync('docs/PROGRESS.md').mtime;const diff=(new Date()-mt)/(1000*60);if(diff>30){process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'Stop',decision:'block',reason:'docs/PROGRESS.md not updated this session. Log progress before stopping. Use /log-progress.'}}));}else{process.stdout.write(JSON.stringify({}));}}catch(e){process.stdout.write(JSON.stringify({}));}\"",
                 "timeout": 10
             }
         ],
         "PreToolUse": [
             {
                 "type": "command",
-                "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/pre-tool-use.js",
+                "windows": "node -e \"let b='';process.stdin.on('data',c=>b+=c);process.stdin.on('end',()=>{const d=JSON.parse(b);if(d.tool_name==='run_in_terminal'){const cmd=(d.tool_input&&(d.tool_input.command||'')).toLowerCase();const bad=['rm -rf /','drop table','drop database','format c','del /f /s /q','rmdir /s /q c:'];const f=bad.find(x=>cmd.includes(x));if(f){process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',permissionDecision:'deny',permissionDecisionReason:'BLOCKED: Dangerous command ('+f+')'}}));}else{process.stdout.write(JSON.stringify({}));}}else{process.stdout.write(JSON.stringify({}));}});\"",
+                "command": "node -e \"let b='';process.stdin.on('data',c=>b+=c);process.stdin.on('end',()=>{const d=JSON.parse(b);if(d.tool_name==='run_in_terminal'){const cmd=(d.tool_input&&(d.tool_input.command||'')).toLowerCase();const bad=['rm -rf /','drop table','drop database','format c','del /f /s /q','rmdir /s /q c:'];const f=bad.find(x=>cmd.includes(x));if(f){process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',permissionDecision:'deny',permissionDecisionReason:'BLOCKED: Dangerous command ('+f+')'}}));}else{process.stdout.write(JSON.stringify({}));}}else{process.stdout.write(JSON.stringify({}));}});\"",
                 "timeout": 5
             }
         ],
         "PostToolUse": [
             {
                 "type": "command",
-                "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/post-tool-use.js",
+                "windows": "node -e \"let b='';process.stdin.on('data',c=>b+=c);process.stdin.on('end',()=>{const fs=require('fs');const d=JSON.parse(b);if(['create_file','replace_string_in_file','run_in_terminal'].includes(d.tool_name)){try{fs.appendFileSync('docs/trajectory.jsonl',JSON.stringify({ts:new Date().toISOString(),tool:d.tool_name,input:JSON.stringify(d.tool_input||{}).slice(0,200),result:(d.tool_response||'').slice(0,200)})+'\\n');}catch(e){}}process.stdout.write(JSON.stringify({}));});\"",
+                "command": "node -e \"let b='';process.stdin.on('data',c=>b+=c);process.stdin.on('end',()=>{const fs=require('fs');const d=JSON.parse(b);if(['create_file','replace_string_in_file','run_in_terminal'].includes(d.tool_name)){try{fs.appendFileSync('docs/trajectory.jsonl',JSON.stringify({ts:new Date().toISOString(),tool:d.tool_name,input:JSON.stringify(d.tool_input||{}).slice(0,200),result:(d.tool_response||'').slice(0,200)})+'\\n');}catch(e){}}process.stdout.write(JSON.stringify({}));});\"",
                 "timeout": 5
             }
         ]
+    }
+}
     }
 }
