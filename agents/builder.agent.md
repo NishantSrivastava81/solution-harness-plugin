@@ -31,10 +31,11 @@ Every session begins with these steps — no exceptions:
 1. **Read** `docs/PROGRESS.md` — understand what was done in previous sessions
 2. **Read** `docs/FEATURES.json` — find the highest-priority item with status `"not-started"` or `"needs-rework"`. Check all prefixes: `F` (new features), `R` (refactoring tasks), `E` (existing features needing work)
 3. **Read** `docs/PLAN.md` — understand the spec and sprint contract
-4. **Read** `docs/ARCHITECTURE.md` — understand module boundaries
-5. **Check** existing code — run `ls src/` and review the current state
-6. If a dev server or app exists, **start it** and verify it works before making changes
-7. **Run existing tests** before making any changes — establish a passing baseline
+4. **Check for a design doc** — if the feature has a `"design_doc"` field in FEATURES.json, **read the design document first**. It contains researched patterns, library choices, API designs, data models, and implementation steps. Follow the design, don't reinvent.
+5. **Read** `docs/ARCHITECTURE.md` — understand module boundaries
+6. **Check** existing code — run `ls src/` and review the current state
+7. If a dev server or app exists, **start it** and verify it works before making changes
+8. **Run existing tests** before making any changes — establish a passing baseline
 
 ## Working with Existing Code (Onboarded Projects)
 

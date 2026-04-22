@@ -7,7 +7,7 @@ A single-install plugin that provides everything you need to build, refactor, an
 | Component | Count | Contents |
 |-----------|-------|----------|
 | **Agents** | 5 | planner, builder, evaluator, reviewer, janitor |
-| **Skills** | 13 | /init-solution, /onboard, /add-features, /refactor, /fix-issue, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check |
+| **Skills** | 14 | /init-solution, /onboard, /add-features, /design-feature, /refactor, /fix-issue, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check |
 | **Hooks** | 4 | SessionStart (inject status), Stop (enforce progress log), PreToolUse (block dangerous commands), PostToolUse (trajectory logging) |
 
 ## Install
@@ -43,6 +43,7 @@ If published to a plugin marketplace, search `@agentPlugins` in the Extensions v
 3. Type `/onboard` — analyzes your codebase, generates all harness state files
 4. Then:
    - `/add-features` to plan new capabilities
+   - `/design-feature` to research patterns and create technical design before building
    - `/refactor` to plan improvements
    - `/fix-issue` to diagnose and fix bugs
 5. Switch to **builder** → `/next-feature` → build → `/evaluate`
@@ -50,6 +51,7 @@ If published to a plugin marketplace, search `@agentPlugins` in the Extensions v
 ### Daily Workflow
 ```
 /next-feature          → see what to build
+/design-feature        → research patterns, create technical design
 [switch to builder]    → implement it
 /pre-commit            → validate before committing
 /log-progress          → record what was done
@@ -79,6 +81,7 @@ solution-harness-plugin/
 │   ├── init-solution/SKILL.md          # /init-solution — new project setup
 │   ├── onboard/SKILL.md               # /onboard — existing project setup
 │   ├── add-features/SKILL.md          # /add-features — plan new capabilities
+│   ├── design-feature/SKILL.md       # /design-feature — research & design before building
 │   ├── refactor/SKILL.md              # /refactor — plan improvements
 │   ├── fix-issue/SKILL.md             # /fix-issue — diagnose & fix bugs
 │   ├── next-feature/SKILL.md          # /next-feature — what to build next
@@ -130,6 +133,17 @@ your-project/
 | `R` | Refactoring tasks (/refactor) |
 | `B` | Bug fixes (/fix-issue) |
 
+## Principles Applied
+
+| Principle | Source | How |
+|-----------|--------|-----|
+| Separate generation from evaluation | Anthropic | Builder + Evaluator are distinct agents |
+| Work incrementally | Anthropic | One feature at a time, tracked in FEATURES.json |
+| File-based session state | OpenAI | PROGRESS.md + FEATURES.json = agent memory |
+| Build to delete | Schmid | Every component independently removable; /harness-health audits |
+| Feedforward + feedback controls | Fowler | Instructions steer before; evaluator + hooks correct after |
+| Harness as dataset | Schmid | PostToolUse hook logs trajectories |
+| Entropy control | OpenAI | Janitor agent detects drift |
 
 ## Requirements
 
