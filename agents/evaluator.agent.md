@@ -1,6 +1,6 @@
 ---
 description: "QA evaluator — grade the solution against plan criteria with calibrated skepticism"
-tools: ["search", "read_file", "list_dir", "grep_search", "semantic_search", "run_in_terminal", "file_search"]
+tools: ["edit", "execute", "read", "search"]
 handoffs:
   - label: "Fix Issues Found"
     agent: builder

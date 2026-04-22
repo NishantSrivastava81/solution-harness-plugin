@@ -1,6 +1,6 @@
 ---
 description: "Implement features one at a time from the plan, with incremental commits"
-tools: ["search", "read_file", "list_dir", "grep_search", "semantic_search", "create_file", "replace_string_in_file", "run_in_terminal", "file_search"]
+tools: ["edit", "execute", "read", "search", "agent"]
 handoffs:
   - label: "Run Quality Evaluation"
     agent: evaluator

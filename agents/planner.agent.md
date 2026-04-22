@@ -1,7 +1,6 @@
 ---
 description: "Expand a solution idea into a full product specification and feature breakdown"
-tools: ["search", "web", "read_file", "list_dir", "grep_search", "semantic_search", "create_file"]
-model: GPT-5.2 (copilot)
+tools: ["edit", "execute", "read", "search", "agent"]
 handoffs:
   - label: "Start Building"
     agent: builder

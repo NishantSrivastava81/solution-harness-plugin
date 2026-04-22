@@ -1,6 +1,6 @@
 ---
 description: "Detect and fix drift, dead code, stale patterns, and architectural decay in the codebase"
-tools: ["search", "read_file", "list_dir", "grep_search", "semantic_search", "file_search", "run_in_terminal", "create_file", "replace_string_in_file"]
+tools: ["edit", "execute", "read", "search"]
 ---
 
 # Janitor Agent

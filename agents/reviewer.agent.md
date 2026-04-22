@@ -1,6 +1,6 @@
 ---
 description: "Code reviewer — security, architecture, and quality review of recent changes"
-tools: ["search", "read_file", "list_dir", "grep_search", "semantic_search", "file_search"]
+tools: ["read", "search"]
 handoffs:
   - label: "Fix Review Issues"
     agent: builder
