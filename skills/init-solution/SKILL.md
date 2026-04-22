@@ -8,9 +8,19 @@ description: "Initialize a new harness-managed solution project from a brief ide
 You are setting up a brand new harness-managed solution project.
 
 ## Input
-The user will provide a brief idea (1-4 sentences).
+The user will provide a brief idea (1-4 sentences), OR a detailed specification
+may already exist at `docs/SPEC.md` from a prior `/ideate` session.
+
+**Check for docs/SPEC.md first.** If it exists, use it as the primary input instead
+of asking for a brief idea. The spec contains researched scope, MVP features, tech stack
+decisions, and trade-offs already explored with the user.
 
 ## Steps
+
+### 0. Check for Existing Specification
+If `docs/SPEC.md` exists, read it and use it as the basis for the plan.
+This means the user already went through `/ideate` and has a refined specification.
+Skip research (Step 6) — the spec already includes it.
 
 ### 1. Save the Idea
 Create `docs/IDEA.md` with the user's idea, verbatim. Do not modify it.
