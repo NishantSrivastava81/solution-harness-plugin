@@ -7,7 +7,7 @@ A single-install plugin that provides everything you need to build, refactor, an
 | Component | Count | Contents |
 |-----------|-------|----------|
 | **Agents** | 7 | ideator, planner, architect, builder, evaluator, reviewer, janitor |
-| **Skills** | 15 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check |
+| **Skills** | 16 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check |
 | **Hooks** | 4 | SessionStart (inject status), Stop (enforce progress log), PreToolUse (block dangerous commands), PostToolUse (trajectory logging) |
 
 ## Install
@@ -88,6 +88,7 @@ solution-harness-plugin/
 │   ├── refine-design/SKILL.md        # /refine-design — iterate on design with feedback
 │   ├── refactor/SKILL.md              # /refactor — plan improvements
 │   ├── fix-issue/SKILL.md             # /fix-issue — diagnose & fix bugs
+│   ├── sync-plan/SKILL.md             # /sync-plan — realign features after architecture changes
 │   ├── next-feature/SKILL.md          # /next-feature — what to build next
 │   ├── evaluate/SKILL.md             # /evaluate — quality evaluation
 │   ├── pre-commit/SKILL.md           # /pre-commit — validate before commit
