@@ -17,10 +17,20 @@ decisions, and trade-offs already explored with the user.
 
 ## Steps
 
-### 0. Check for Existing Specification
-If `docs/SPEC.md` exists, read it and use it as the basis for the plan.
-This means the user already went through `/ideate` and has a refined specification.
-Skip research (Step 6) — the spec already includes it.
+### 0. Check for Existing Artifacts
+Check for pre-existing artifacts from earlier harness steps:
+
+**docs/SPEC.md** (from `/ideate` or ideator agent):
+If it exists, use it as the primary input. Skip research (Step 6).
+
+**docs/ARCHITECTURE.md** (from architect agent):
+If it exists, **DO NOT overwrite it**. Read it and use it to:
+- Align the tech stack in PLAN.md with the architectural decisions
+- Shape FEATURES.json — features should follow the module structure defined in the architecture
+- Ensure acceptance criteria reference the correct module boundaries and patterns
+- Skip generating a new ARCHITECTURE.md in Step 7
+
+If ARCHITECTURE.md does NOT exist, generate a basic one in Step 7 as before.
 
 ### 1. Save the Idea
 Create `docs/IDEA.md` with the user's idea, verbatim. Do not modify it.
@@ -128,8 +138,9 @@ applyTo: "tests/**"
 If the idea references specific technologies or domains, do a quick search to gather context.
 
 ### 7. Generate the Plan
-- Write `docs/PLAN.md` with the complete product specification (overview, tech stack, architecture, features with user stories and acceptance criteria, non-functional requirements, out of scope)
-- Generate `docs/FEATURES.json` with 8-15 prioritized features, all status `"not-started"`, using this format:
+- Write `docs/PLAN.md` with the complete product specification (overview, tech stack, architecture, features with user stories and acceptance criteria, non-functional requirements, out of scope). If `docs/ARCHITECTURE.md` already exists, reference it for tech stack and architecture sections rather than inventing new choices.
+- Generate `docs/FEATURES.json` with 8-15 prioritized features, all status `"not-started"`. If `docs/ARCHITECTURE.md` exists, align features with its module structure — each feature should map to the modules defined there.
+- Use this format for FEATURES.json:
 
 ```json
 {
@@ -151,7 +162,7 @@ If the idea references specific technologies or domains, do a quick search to ga
 }
 ```
 
-- Write `docs/ARCHITECTURE.md` with module boundaries, dependency rules, data flow, key technical decisions
+- **Only if `docs/ARCHITECTURE.md` does NOT already exist**: Write `docs/ARCHITECTURE.md` with module boundaries, dependency rules, data flow, key technical decisions. If it already exists (from the architect agent), skip this — the existing one is more thorough.
 
 ### 8. Initialize Progress Tracking
 Create `docs/PROGRESS.md`:
