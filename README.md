@@ -138,17 +138,7 @@ your-project/
 | `R` | Refactoring tasks (/refactor) |
 | `B` | Bug fixes (/fix-issue) |
 
-## Principles Applied
 
-| Principle | Source | How |
-|-----------|--------|-----|
-| Separate generation from evaluation | Anthropic | Builder + Evaluator are distinct agents |
-| Work incrementally | Anthropic | One feature at a time, tracked in FEATURES.json |
-| File-based session state | OpenAI | PROGRESS.md + FEATURES.json = agent memory |
-| Build to delete | Schmid | Every component independently removable; /harness-health audits |
-| Feedforward + feedback controls | Fowler | Instructions steer before; evaluator + hooks correct after |
-| Harness as dataset | Schmid | PostToolUse hook logs trajectories |
-| Entropy control | OpenAI | Janitor agent detects drift |
 
 ## Requirements
 
