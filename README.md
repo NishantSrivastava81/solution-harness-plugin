@@ -25,8 +25,7 @@ Clone this repo, then add to your VS Code settings:
 }
 ```
 
-### Option C: Marketplace
-If published to a plugin marketplace, search `@agentPlugins` in the Extensions view.
+
 
 ## Usage
 
