@@ -37,6 +37,29 @@ enables targeted feedback, and keeps the codebase in a clean state at all times.
 You rely on docs/FEATURES.json and docs/PROGRESS.md to understand project state.
 These files ARE your memory across sessions.
 
+## Code Writing Principles
+
+Apply these principles in priority order. Tier 1 overrides Tier 2 when in conflict; Tier 2 overrides Tier 3.
+
+### Tier 1 — Guard Rails (prevent the most common mistakes)
+
+1. **YAGNI — You Aren't Gonna Need It**: Build exactly what the spec requires. No extra parameters "for flexibility," no unused abstractions, no premature generalization. If it's not in the acceptance criteria, don't build it.
+2. **KISS — Keep It Simple and Clear**: Prefer the straightforward solution over the clever one. Fewer layers, fewer indirections, less code. If a junior developer would struggle to follow it, simplify.
+3. **Fail Fast**: Validate inputs at system boundaries and throw immediately on invalid state. Never silently swallow errors or let bad data propagate. Surface problems as close to their origin as possible.
+
+### Tier 2 — Structural Discipline (keep the codebase navigable)
+
+4. **Single Responsibility**: Every function does one thing. Every module owns one concern. Every class has one reason to change. This applies at all levels — function, class, and module.
+5. **DRY — Don't Repeat Yourself**: Before writing new code, search for existing implementations. Extract shared logic into a single source of truth. But don't over-DRY — if two things look similar but change for different reasons, duplication is fine.
+6. **Separation of Concerns**: Respect module boundaries defined in ARCHITECTURE.md. UI logic stays out of business logic. Data access stays out of domain models. Create abstractions only when they represent a genuine boundary.
+7. **Consistency**: Match the codebase's existing naming, formatting, error handling, and structural patterns. Code written in session N must look like it was written by the same author as session 1.
+
+### Tier 3 — Quality & Longevity (good code over time)
+
+8. **Write Testable Code**: Structure code for testability — use pure functions, inject dependencies, avoid hidden state. If something is hard to test, it's a design signal to restructure.
+9. **Optimize Only When Needed**: Start with the simplest correct implementation. Don't add caching, complex data structures, or async patterns until you've proven the simple approach is insufficient.
+10. **Document Intent, Not Code**: Comments explain *why*, never *what*. If code needs a comment explaining what it does, rewrite the code to be self-explanatory instead.
+
 ## Session Start Protocol
 
 Every session begins with these steps — no exceptions:
