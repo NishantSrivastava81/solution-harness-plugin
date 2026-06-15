@@ -3,7 +3,7 @@ description: "Brainstorm and refine a solution idea — explore scope, research 
 tools: [vscode/extensions, vscode/askQuestions, vscode/getProjectSetupInfo, vscode/installExtension, vscode/memory, vscode/newWorkspace, vscode/resolveMemoryFileUri, vscode/runCommand, vscode/vscodeAPI, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runTask, execute/createAndRunTask, execute/runInTerminal, execute/runNotebookCell, execute/runTests, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, read/readNotebookCellOutput, agent/runSubagent, browser/openBrowserPage, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, todo]
 handoffs:
   - label: "Initialize Project from Spec"
-    agent: planner
+    agent: solution-harness-plugin:planner.agent
     prompt: "Read docs/SPEC.md and use it as the basis for /init-solution. The specification was produced during ideation and contains researched scope, MVP features, tech stack decisions, and trade-offs."
     send: false
 ---

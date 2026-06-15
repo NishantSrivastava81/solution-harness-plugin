@@ -3,7 +3,7 @@ description: "Code reviewer — security, architecture, and quality review of re
 tools: ["read", "search"]
 handoffs:
   - label: "Fix Review Issues"
-    agent: builder
+    agent: solution-harness-plugin:builder.agent
     prompt: "The reviewer found issues. Check docs/REVIEW.md for details, then address the findings."
     send: false
 ---

@@ -6,8 +6,8 @@ A single-install plugin that provides everything you need to build, refactor, an
 
 | Component | Count | Contents |
 |-----------|-------|----------|
-| **Agents** | 7 | ideator, planner, architect, builder, evaluator, reviewer, janitor |
-| **Skills** | 16 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check |
+| **Agents** | 8 | ideator, planner, architect, builder, evaluator, reviewer, janitor, orchestrator |
+| **Skills** | 17 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check, /loop |
 | **Hooks** | 4 | SessionStart (inject status), Stop (enforce progress log), PreToolUse (block dangerous commands), PostToolUse (trajectory logging) |
 
 ## Install
@@ -66,6 +66,27 @@ Clone this repo, then add to your VS Code settings:
 /architecture-check    → verify module boundaries
 ```
 
+### Autonomous Loop
+Instead of driving each cycle by hand, let the **orchestrator** run the pipeline for you.
+It selects the next in-scope feature, dispatches a **builder** to make it and a separate
+**evaluator** to check it, and commits only on a green verdict — repeating until the goal
+is met or a stop condition fires.
+```
+[switch to orchestrator] → /loop
+```
+The loop is governed by three things it writes into your workspace:
+- **docs/LOOP.md** — the loop contract: verifiable goal, in-scope feature IDs, autonomy
+  level, verification gates, and escalation rules (the `/goal` primitive).
+- **docs/loop-budget.md** — per-run caps (iterations, commits, rework-per-feature,
+  wall-clock). When any cap is hit, the loop stops and reports — no runaway commits.
+- **docs/loop-run-log.md** — an append-only, per-iteration ledger of what was built,
+  the evaluator verdict, tests, and the commit.
+
+**Autonomy levels** (set in the contract): **L1** report-only (pause for approval after
+each iteration, the default) → **L2** assisted (auto-commit within scope) → **L3**
+unattended (narrow, highly-verifiable scopes only). The builder (maker) and evaluator
+(checker) are always separate subagents — the loop never grades its own work.
+
 ## Plugin Structure
 
 ```
@@ -78,7 +99,8 @@ solution-harness-plugin/
 │   ├── builder.agent.md                 # Plan → Code (one feature at a time)
 │   ├── evaluator.agent.md              # Code → Quality grade (skeptical)
 │   ├── reviewer.agent.md               # Security & architecture review
-│   └── janitor.agent.md                # Drift detection & cleanup
+│   ├── janitor.agent.md                # Drift detection & cleanup
+│   └── orchestrator.agent.md           # Loop driver — runs the pipeline autonomously
 ├── skills/
 │   ├── init-solution/SKILL.md          # /init-solution — new project setup
 │   ├── onboard/SKILL.md               # /onboard — existing project setup
@@ -95,7 +117,8 @@ solution-harness-plugin/
 │   ├── log-progress/SKILL.md         # /log-progress — record session progress
 │   ├── harness-health/SKILL.md       # /harness-health — harness self-assessment
 │   ├── testing/SKILL.md              # /testing — test patterns & runners
-│   └── architecture-check/SKILL.md   # /architecture-check — boundary verification
+│   ├── architecture-check/SKILL.md   # /architecture-check — boundary verification
+│   └── loop/SKILL.md                 # /loop — autonomous goal-bounded build loop
 ├── hooks/
 │   └── hooks.json                     # Lifecycle hook configuration
 └── scripts/
@@ -123,7 +146,10 @@ your-project/
 │   ├── FEATURES.json                   # Feature tracking (session state)
 │   ├── PROGRESS.md                     # Append-only session log
 │   ├── ARCHITECTURE.md                 # Module boundaries & decisions
-│   └── trajectory.jsonl                # Agent action log (auto-captured)
+│   ├── trajectory.jsonl                # Agent action log (auto-captured)
+│   ├── LOOP.md                         # Loop contract: goal, scope, autonomy, escalation (/loop)
+│   ├── loop-budget.md                  # Per-run caps & live counters (/loop)
+│   └── loop-run-log.md                 # Per-iteration ledger (/loop)
 ├── src/
 └── tests/
 ```

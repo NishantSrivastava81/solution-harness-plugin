@@ -3,8 +3,12 @@ description: "Expand a solution idea into a full product specification and featu
 tools: [vscode/extensions, vscode/askQuestions, vscode/getProjectSetupInfo, vscode/installExtension, vscode/memory, vscode/newWorkspace, vscode/resolveMemoryFileUri, vscode/runCommand, vscode/vscodeAPI, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/createAndRunTask, execute/runInTerminal, execute/runTests, execute/runNotebookCell, read/terminalSelection, read/terminalLastCommand, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, read/readNotebookCellOutput, agent/runSubagent, browser/openBrowserPage, browser/readPage, browser/screenshotPage, browser/navigatePage, browser/clickElement, browser/dragElement, browser/hoverElement, browser/typeInPage, browser/runPlaywrightCode, browser/handleDialog, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, web/githubTextSearch, todo]
 handoffs:
   - label: "Start Building"
-    agent: builder
+    agent: solution-harness-plugin:builder.agent
     prompt: "Read docs/PLAN.md and docs/FEATURES.json, then begin implementing the first feature."
+    send: false
+  - label: "Run Autonomous Loop"
+    agent: solution-harness-plugin:orchestrator.agent
+    prompt: "The plan is in docs/PLAN.md and docs/FEATURES.json. Run /loop: establish the loop contract, then drive build → verify → commit one feature at a time until the goal is met or a stop condition fires."
     send: false
 ---
 

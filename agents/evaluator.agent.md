@@ -3,7 +3,7 @@ description: "QA evaluator — grade the solution against plan criteria with cal
 tools: ["edit", "execute", "read", "search"]
 handoffs:
   - label: "Fix Issues Found"
-    agent: builder
+    agent: solution-harness-plugin:builder.agent
     prompt: "The evaluator found issues. Read docs/EVALUATION.md for the detailed findings, then fix the highest-priority issues."
     send: false
 ---

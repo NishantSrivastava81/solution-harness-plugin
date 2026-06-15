@@ -3,11 +3,11 @@ description: "Implement features one at a time from the plan, with incremental c
 tools: [vscode/extensions, vscode/askQuestions, vscode/getProjectSetupInfo, vscode/installExtension, vscode/memory, vscode/newWorkspace, vscode/resolveMemoryFileUri, vscode/runCommand, vscode/vscodeAPI, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/createAndRunTask, execute/runInTerminal, execute/runTests, execute/runNotebookCell, read/terminalSelection, read/terminalLastCommand, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, read/readNotebookCellOutput, agent/runSubagent, browser/openBrowserPage, browser/readPage, browser/screenshotPage, browser/navigatePage, browser/clickElement, browser/dragElement, browser/hoverElement, browser/typeInPage, browser/runPlaywrightCode, browser/handleDialog, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, web/githubTextSearch, todo]
 handoffs:
   - label: "Run Quality Evaluation"
-    agent: evaluator
+    agent: solution-harness-plugin:evaluator.agent
     prompt: "Evaluate the current state of the solution against the plan and feature criteria."
     send: false
   - label: "Request Code Review"
-    agent: reviewer
+    agent: solution-harness-plugin:reviewer.agent
     prompt: "Review the most recent changes for code quality, security, and adherence to architecture."
     send: false
 ---
