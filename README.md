@@ -25,6 +25,40 @@ Clone this repo, then add to your VS Code settings:
 }
 ```
 
+### Option C: GitHub Copilot Cloud Agent (Pilot)
+
+Install the cloud distribution into a target Git repository with Node.js 22+:
+
+```sh
+node scripts/install-cloud.cjs --dry-run /path/to/your-project
+node scripts/install-cloud.cjs /path/to/your-project
+```
+
+This adds native `.github/agents`, `.github/skills`, `.github/hooks`, and a
+Copilot setup workflow. Existing project instructions are untouched; existing
+setup/config files are preserved, and other differing destinations stop the
+installation before writing. The local plugin is unchanged.
+
+Before delegating, approve feature IDs and real test commands in the installed
+`.github/harness/config.json`, add project dependency setup, and merge the
+customizations into the target's default branch. Then select **orchestrator**
+in GitHub's Agents UI or issue assignment dialog:
+
+> Implement F001 only using cloud-loop. Obtain an independent evaluator verdict,
+> run all configured checks, and open a draft pull request. Stop on a blocker.
+
+The pilot supplies three cloud profiles (orchestrator, builder, evaluator), the
+17 existing skills, and a dedicated cloud-loop skill. It runs one approved
+feature per session with bounded rework, real test gates, and durable reports.
+It is not a multi-feature scheduler, and local tests do not prove hosted-agent
+behavior. See [the cloud setup and acceptance guide](cloud/README.md) for details.
+
+Run the dependency-free installer/runtime tests with:
+
+```sh
+node --test tests/cloud.test.cjs
+```
+
 
 
 ## Usage
@@ -167,6 +201,14 @@ your-project/
 
 ## Requirements
 
+### Local Plugin
 - VS Code with GitHub Copilot
 - Node.js (for hooks)
 - Git (recommended)
+
+### Cloud Pilot
+- GitHub-hosted target repository with Copilot cloud agent enabled
+- Node.js 22+ and Git for installation; Node 22+ in the cloud setup
+- Approved feature scope, configured non-interactive tests, and project dependencies
+- Human PR review/merge and required CI checks
+- No running local IDE or persistent local machine required

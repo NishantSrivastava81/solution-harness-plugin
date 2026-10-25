@@ -1,0 +1,20 @@
+{
+    "version": 1,
+    "hooks": {
+        "sessionStart": [
+            { "type": "command", "bash": "node .github/harness/runtime.cjs sessionStart", "cwd": ".", "timeoutSec": 10 }
+        ],
+        "preToolUse": [
+            { "type": "command", "bash": "node .github/harness/runtime.cjs preToolUse", "cwd": ".", "timeoutSec": 5 }
+        ],
+        "postToolUse": [
+            { "type": "command", "bash": "node .github/harness/runtime.cjs postToolUse", "cwd": ".", "timeoutSec": 5 }
+        ],
+        "subagentStop": [
+            { "type": "command", "bash": "node .github/harness/runtime.cjs subagentStop", "cwd": ".", "timeoutSec": 20 }
+        ],
+        "agentStop": [
+            { "type": "command", "bash": "node .github/harness/runtime.cjs agentStop", "cwd": ".", "timeoutSec": 5 }
+        ]
+    }
+}
