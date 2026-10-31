@@ -1,4 +1,7 @@
-# Solution Harness — Copilot Agent Plugin
+---
+title: Solution Harness Copilot Agent Plugin
+description: Agents, skills, hooks, and execution controls for incremental software delivery with GitHub Copilot.
+---
 
 A single-install plugin that provides everything you need to build, refactor, and maintain solutions with GitHub Copilot.
 
@@ -7,7 +10,7 @@ A single-install plugin that provides everything you need to build, refactor, an
 | Component | Count | Contents |
 |-----------|-------|----------|
 | **Agents** | 8 | ideator, planner, architect, builder, evaluator, reviewer, janitor, orchestrator |
-| **Skills** | 17 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check, /loop |
+| **Skills** | 19 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check, /loop, /plan-execution, /parallel-loop |
 | **Hooks** | 4 | SessionStart (inject status), Stop (enforce progress log), PreToolUse (block dangerous commands), PostToolUse (trajectory logging) |
 
 ## Install
@@ -121,6 +124,33 @@ each iteration, the default) → **L2** assisted (auto-commit within scope) → 
 unattended (narrow, highly-verifiable scopes only). The builder (maker) and evaluator
 (checker) are always separate subagents — the loop never grades its own work.
 
+### Local Parallel Stories
+
+Version 1.1.0 adds opt-in parallel stories within one approved feature. Run
+`/plan-execution` for dependency/resource-aware dry-run batches, then
+`/parallel-loop` for coordinator-controlled worktrees, independent exact-commit
+review, and serial integration. Sequential `/loop` remains the default.
+
+Install the local runtime from this plugin checkout:
+
+```powershell
+node scripts\install-parallel.cjs --dry-run 'C:\work\project'
+node scripts\install-parallel.cjs 'C:\work\project'
+```
+
+Use Node.js 22.20+ or 24+. Review instruction migration, real verification commands,
+ownership, and approvals before starting. Workers must be opened in separate
+verified workspaces; terminal `cwd` is not editing-tool isolation. Automatic
+worker launch, multi-feature scheduling, and hosted parallelism are deferred.
+The cloud installer excludes the two local-only skills.
+
+See the [local execution and recovery guide](parallel/README.md) for the story
+schema, command sequence, operator approvals, limits, and cleanup. Runtime tests:
+
+```powershell
+node --test tests\parallel.test.cjs
+```
+
 ## Plugin Structure
 
 ```
@@ -152,10 +182,14 @@ solution-harness-plugin/
 │   ├── harness-health/SKILL.md       # /harness-health — harness self-assessment
 │   ├── testing/SKILL.md              # /testing — test patterns & runners
 │   ├── architecture-check/SKILL.md   # /architecture-check — boundary verification
-│   └── loop/SKILL.md                 # /loop — autonomous goal-bounded build loop
+│   ├── loop/SKILL.md                 # /loop — sequential goal-bounded build loop
+│   ├── plan-execution/SKILL.md       # /plan-execution — local story dry-run planning
+│   └── parallel-loop/SKILL.md        # /parallel-loop — isolated local story execution
+├── parallel/                          # Local model, coordinator, hooks, schema, and guide
 ├── hooks/
 │   └── hooks.json                     # Lifecycle hook configuration
 └── scripts/
+    ├── install-parallel.cjs           # Add local runtime without replacing project instructions
     ├── session-start.js               # Inject project status at session start
     ├── session-stop.js                # Enforce progress logging before stop
     ├── pre-tool-use.js                # Block dangerous terminal commands

@@ -55,6 +55,15 @@ Create `AGENTS.md` at the project root — a short table of contents (not an enc
 - Run tests before marking any feature complete
 - One feature at a time
 
+## Optional Local Parallel Assignments
+- Sequential mode remains the default; parallel stories still share one feature.
+- With a valid local runtime assignment only, builders implement their assigned
+  story in a separate worktree and report instead of committing or logging shared progress.
+- Evaluators review the exact assigned candidate and write only their private report.
+- The coordinator alone commits, integrates, and publishes feature/backlog status
+  and progress after independent full-feature review.
+- Workers must not edit shared planning, instructions, or runtime configuration.
+
 ## Project Structure
 docs/          — Plan, features, progress, architecture
 src/           — Application source code
@@ -82,6 +91,15 @@ Create `.github/copilot-instructions.md` with project-wide coding standards:
 - Start: Read docs/PROGRESS.md and docs/FEATURES.json
 - During: Work on highest-priority incomplete feature
 - End: Commit code, update docs/PROGRESS.md
+
+## Assigned-Story Exception
+- Only for a valid local parallel runtime assignment, replace feature selection
+  with the assigned story and replace worker commits/progress with private reports.
+- Builders and evaluators use separate verified workspaces and never merge,
+  deploy, choose other features, or write shared status/configuration/instructions.
+- The coordinator alone captures commits, serializes integration, and publishes
+  status and progress after independent full-feature acceptance.
+- Unassigned sessions retain the sequential lifecycle below.
 
 ## Feature Lifecycle
 1. Read feature spec from docs/FEATURES.json
@@ -118,6 +136,9 @@ applyTo: "docs/**"
 - PLAN.md can only be modified by the planner agent
 - FEATURES.json — only modify status fields
 - PROGRESS.md — only append new entries
+- During a valid local parallel assignment, workers must not edit shared planning,
+  backlog, progress, or evaluation files. Only the coordinator publishes accepted
+  delivery status/evidence and appends progress; feature definitions stay intact.
 ```
 
 ### 5. Create .github/instructions/test-standards.instructions.md

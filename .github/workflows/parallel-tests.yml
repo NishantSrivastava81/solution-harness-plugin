@@ -1,0 +1,40 @@
+name: Local parallel story tests
+
+on:
+  pull_request:
+    paths:
+      - "parallel/**"
+      - "agents/**"
+      - "skills/**"
+      - "hooks/**"
+      - "scripts/install-*.cjs"
+      - "tests/parallel.test.cjs"
+      - ".github/workflows/parallel-tests.yml"
+  push:
+    paths:
+      - "parallel/**"
+      - "agents/**"
+      - "skills/**"
+      - "hooks/**"
+      - "scripts/install-*.cjs"
+      - "tests/parallel.test.cjs"
+      - ".github/workflows/parallel-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  local-parallel:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ["22.20.0", "24.x"]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --test tests/parallel.test.cjs

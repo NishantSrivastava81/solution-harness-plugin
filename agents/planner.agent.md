@@ -91,6 +91,16 @@ Document the technical architecture:
 - Data flow between components
 - Key technical decisions with rationale
 
+### Optional local story execution plan
+
+When the user requests parallel development, use `/plan-execution` after feature
+and architecture planning. Keep feature definitions authoritative; add an
+approved story breakdown with traceable criteria and explicit dependencies.
+Include inherited feature prerequisites, architecture gates, shared-file
+ownership, and test-resource conflicts. Resolve open design decisions before
+recommending dispatch. A dry-run plan does not authorize workers or multiple
+active features. Existing sequential projects need no story backlog.
+
 ## Harnessability Guidance (Fowler / Ashby's Law)
 When choosing technologies and architecture, **prefer harnessable choices**:
 - **Strongly typed languages** (TypeScript, Go, Rust) — type checking is a free feedback sensor

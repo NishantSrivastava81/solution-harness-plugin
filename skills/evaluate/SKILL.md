@@ -5,6 +5,12 @@ description: "Run quality evaluation on the current solution. Grades every compl
 
 # Evaluate Solution
 
+For a valid local parallel evaluator assignment, use the evaluator agent's
+assigned-candidate mode instead of the shared report/status-writing protocol
+below. Obtain `context`, review that exact SHA independently, and submit a private
+`review-report`. A final feature review must cover all parent criteria. Never
+write shared status or repair a candidate from an evaluator workspace.
+
 Run the full evaluator protocol:
 
 1. Read `docs/PLAN.md`, `docs/FEATURES.json`, `docs/PROGRESS.md`, and `docs/ARCHITECTURE.md`

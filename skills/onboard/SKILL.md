@@ -49,6 +49,12 @@ Create `.github/copilot-instructions.md` — **adapt to the project's EXISTING c
 
 Create `.github/instructions/docs-protection.instructions.md` and `.github/instructions/test-standards.instructions.md`.
 
+Include the narrow assigned-story exception from `/init-solution` in newly
+generated instructions, while retaining sequential execution as the default.
+Do not install or enable parallel execution automatically. For existing customized
+instructions, propose a reviewed migration instead of overwriting them; use the
+local parallel guide before confirming instruction/workspace isolation.
+
 ## Step 3: Generate docs/IDEA.md
 Document what this project is, its current state, and that it was onboarded (not greenfield).
 

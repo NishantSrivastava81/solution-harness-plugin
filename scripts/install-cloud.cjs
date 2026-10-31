@@ -77,8 +77,9 @@ function installBundle(targetDirectory, files, options = {}) {
     return { added: pending.map(file => file.relativePath), unchanged, preserved };
 }
 
-function copyTree(files, source, destination) {
+function copyTree(files, source, destination, excluded = new Set()) {
     for (const entry of fs.readdirSync(source, { withFileTypes: true }).sort((first, second) => first.name.localeCompare(second.name))) {
+        if (excluded.has(entry.name)) continue;
         const location = path.join(source, entry.name);
         const relativePath = `${destination}/${entry.name}`;
         if (entry.isSymbolicLink()) {
@@ -97,7 +98,7 @@ function copyTree(files, source, destination) {
 function buildBundle(sourceRoot = path.resolve(__dirname, '..')) {
     const files = new Map();
     copyTree(files, path.join(sourceRoot, 'cloud/agents'), '.github/agents');
-    copyTree(files, path.join(sourceRoot, 'skills'), '.github/skills');
+    copyTree(files, path.join(sourceRoot, 'skills'), '.github/skills', new Set(['plan-execution', 'parallel-loop']));
     copyTree(files, path.join(sourceRoot, 'cloud/skills'), '.github/skills');
     for (const [source, destination] of [
         ['cloud/runtime.cjs', '.github/harness/runtime.cjs'],

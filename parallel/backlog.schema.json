@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Solution Harness story backlog",
+  "type": "object",
+  "properties": {
+    "version": { "const": 1 },
+    "stories": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          { "$ref": "#/$defs/story" },
+          {
+            "required": ["feature_id"],
+            "properties": { "feature_id": { "$ref": "#/$defs/featureId" } }
+          }
+        ]
+      }
+    },
+    "epics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "features"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "status", "stories"],
+              "properties": {
+                "id": { "$ref": "#/$defs/featureId" },
+                "status": { "type": "string" },
+                "stories": { "type": "array", "items": { "$ref": "#/$defs/story" } }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    { "required": ["version", "stories"], "not": { "required": ["epics"] } },
+    { "required": ["epics"], "not": { "required": ["stories"] } }
+  ],
+  "$defs": {
+    "featureId": { "type": "string", "pattern": "^[FREB][0-9]{3}$" },
+    "story": {
+      "type": "object",
+      "required": ["id", "title", "status", "acceptance_criteria", "covers_feature_criteria"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[FREB][0-9]{3}-S[0-9]{2,3}$" },
+        "title": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["todo", "done"] },
+        "depends_on": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[FREB][0-9]{3}(-S[0-9]{2,3})?$" }
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "covers_feature_criteria": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 1 }
+        },
+        "evidence": { "type": ["string", "null"] }
+      },
+      "if": { "properties": { "status": { "const": "done" } } },
+      "then": {
+        "required": ["evidence"],
+        "properties": { "evidence": { "type": "string", "minLength": 1 } }
+      }
+    }
+  }
+}

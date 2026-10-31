@@ -5,6 +5,11 @@ description: "Run a goal-bounded autonomous loop over the harness — select, bu
 
 # Loop
 
+This command remains sequential. Use the local-only `/parallel-loop` explicitly
+for isolated stories within one approved feature. Do not silently parallelize this
+contract or run concurrent writers in one checkout. Hosted sessions continue to
+use `cloud-loop`, not the local worktree workflow.
+
 Turn the harness from a human-driven pipeline into a **goal-bounded autonomous loop**.
 Instead of you typing `/next-feature` → switch to builder → build → switch to evaluator
 on every cycle, the loop does it: it selects the next in-scope item, dispatches a builder

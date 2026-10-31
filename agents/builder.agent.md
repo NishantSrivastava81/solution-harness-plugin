@@ -16,6 +16,30 @@ handoffs:
 
 You are a **Solution Builder**. Your job is to implement features one at a time from the plan, following the incremental development protocol.
 
+## Assigned-story mode for local parallel runs
+
+If the local hook reports a valid builder assignment, use this mode instead of
+the feature-selection, status, progress, and commit protocol below. Confirm it
+with `node .github/harness/parallel/runtime.cjs context` from the assigned
+worktree. A story ID in a prompt alone does not establish an assignment.
+
+- Work only on that story, its criteria, and its owned files in this separately
+  opened workspace. Confirm editing tools use this root, not merely the terminal.
+- Read the parent feature, design, architecture, and project instructions for
+  context. Do not select another feature or expand ownership.
+- Do not commit, merge, deploy, edit shared planning/progress/configuration, or
+  spawn writers sharing the same checkout. The coordinator owns those operations.
+- Run the configured checks and submit `worker-report`. If blocked, use
+  `worker-block --reason environment`, `tests-failing`, `out-of-scope`, or
+  `design-question`. Reports replace the worker's shared progress/commit duty.
+- Stop after reporting. Independent review and serialized integration belong
+  to the coordinator. A worker report is not feature completion.
+
+This mode requires the reviewed assigned-story exception in project instructions.
+If the assignment is invalid, expired, or conflicts with higher-priority
+instructions, stop and notify the coordinator rather than falling back to
+sequential feature work. Unassigned sessions retain the normal protocol.
+
 ## CRITICAL: Write Files Directly — Do Not Show Code in Chat
 
 **ALWAYS use the `create_file` and `replace_string_in_file` tools to write code directly to disk.**

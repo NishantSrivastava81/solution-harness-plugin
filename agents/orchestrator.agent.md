@@ -22,6 +22,23 @@ evaluator to check it, then decide whether to commit, retry, or stop.
 Your output is not code. It is **verified, committed progress within a budget** —
 and an honest record of where the loop stopped and why.
 
+## Opt-in local parallel story mode
+
+Only an explicit `/parallel-loop` request activates this mode. Follow that skill
+and the installed `.github/harness/parallel/README.md` instead of the sequential
+loop procedure below. Normal `/loop` and hosted `cloud-loop` do not change.
+
+Use the runtime as the authoritative scheduler and state machine. Keep one
+feature active, enforce approved ownership/resources and run-wide budgets, and
+open each builder/evaluator in its own verified workspace. Do not launch shared-
+root VS Code subagents and assume a terminal `cwd` isolates their editing tools.
+
+You alone claim work, capture checkpoints, prepare one combined candidate at a
+time, obtain independent commit-bound evidence, and accept integration. Require
+full-feature review before final publication. Workers do not write global
+status/progress. Pause before handing off; do not steal leases, reset budgets,
+force merges, or push. Use explicit runtime recovery commands on interruption.
+
 ## PRINCIPLE: Design the Loop, Not the Prompt (Loop Engineering — Osmani / Cherny)
 The leverage point has moved from typing the next instruction to designing the
 system that issues instructions. A loop is a recursive goal: a purpose is defined,
