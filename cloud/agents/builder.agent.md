@@ -19,8 +19,12 @@ cloud run and established a passing baseline. Read
 3. Add meaningful tests for the requested behavior, including relevant failure
    cases. Run focused checks after each substantive change. Do not disable,
    delete, or weaken existing checks to obtain green output.
-4. For UI work, use available Playwright tools against localhost when appropriate.
-   External research and services remain subject to the repository firewall.
+4. For UI work, read `.github/skills/frontend-design/SKILL.md` in builder mode.
+   Preserve existing components/tokens and assigned scope; cover responsive
+   layouts, interaction states, and accessibility. Verify the rendered result
+   with available Playwright tools against localhost and report unavailable
+   checks explicitly. External research and services remain subject to the
+   repository firewall; the bundled skill needs no external fetch.
 5. Return a concise summary of changed files, actual checks and outcomes, any
    limitations, and questions for the independent evaluator. Never claim an
    independent PASS yourself.

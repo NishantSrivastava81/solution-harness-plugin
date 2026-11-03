@@ -14,6 +14,7 @@ on:
       - "cloud/**"
       - "tests/parallel.test.cjs"
       - "tests/cloud-parallel.test.cjs"
+      - "tests/frontend-design.test.cjs"
       - "tests/hybrid*.test.cjs"
       - "tests/jira.test.cjs"
       - ".github/workflows/parallel-tests.yml"
@@ -30,6 +31,7 @@ on:
       - "cloud/**"
       - "tests/parallel.test.cjs"
       - "tests/cloud-parallel.test.cjs"
+      - "tests/frontend-design.test.cjs"
       - "tests/hybrid*.test.cjs"
       - "tests/jira.test.cjs"
       - ".github/workflows/parallel-tests.yml"
@@ -68,7 +70,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - run: node --test tests/cloud-parallel.test.cjs
+      - run: node --test tests/cloud-parallel.test.cjs tests/frontend-design.test.cjs
 
   manual-jira-hybrid:
     strategy:

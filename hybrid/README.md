@@ -167,6 +167,12 @@ active contracts. Raw comments and attachments are not automatically forwarded
 to workers. Cloud prompts contain the approved repository criteria and minimal
 Jira provenance.
 
+Developer briefs also include the bundled
+[frontend-design guidance](../skills/frontend-design/SKILL.md), applied only to
+UI work. Hybrid CLI evaluators receive the same guidance in read-only evaluator
+mode. This needs no cloud installer or external skill download and does not
+expand ownership, criteria, or design approvals.
+
 Requirement hashing excludes renamed issue keys and workflow timestamps, but
 each execution mutation still checks the configured eligible workflow statuses.
 Choose permitted in-progress/review statuses explicitly if other integrations

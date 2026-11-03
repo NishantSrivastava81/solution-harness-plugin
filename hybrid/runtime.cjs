@@ -7,6 +7,7 @@ const core = require('../skills/cloud-parallel/scripts/coordinator.cjs');
 const shared = require('../parallel/runtime.cjs');
 const model = require('../parallel/model.cjs');
 const planner = require('./plan.cjs');
+const { frontendGuidance } = require('../skills/frontend-design/guidance.cjs');
 const { requireValue, readJson, hash, noLinks } = model;
 const { git, repository, atomicJson, absent, clean, checks, fingerprint, scopeCheck } = shared;
 
@@ -423,17 +424,23 @@ async function review(root, report, options = {}) {
     });
 }
 
-async function launchReview(root, approve, options = {}) {
-    const { run, config } = await source(root, options), candidate = run.candidate;
-    requireValue(approve && !run.paused && candidate?.phase === 'review' && config.local?.mode === 'copilot-cli', 'Configure an approved isolated CLI evaluator or open the candidate in a separate workspace');
-    const data = context(candidate.workspace);
-    const prompt = `Independent hybrid evaluation. Review only ${candidate.sha} at ${candidate.workspace}.\n`
+function reviewPrompt(run, config, candidate, data) {
+    return `Independent hybrid evaluation. Review only ${candidate.sha} at ${candidate.workspace}.\n`
         + `Criteria: ${JSON.stringify(data.acceptance_criteria)}\nDo not edit source, commit, merge, deploy, or update shared status.\n`
         + `Run the configured checks: ${JSON.stringify(config.verification)}.\nWrite JSON only at ${data.report_path}:\n`
         + JSON.stringify({ run_id: run.id, feature_id: data.feature_id, story_id: data.story_id, candidate_sha: candidate.sha,
             evaluator_id: data.agent_id, assignment_nonce: data.assignment_nonce, verdict: 'FAIL',
             criteria: data.acceptance_criteria.map(criterion => ({ criterion, passed: false, evidence: 'Replace with actual observed evidence' })), issues: [] })
-        + '\nA PASS requires every exact criterion verified and no unresolved issues. Stop after writing the report.\n';
+        + '\nA PASS requires every exact criterion verified and no unresolved issues. Stop after writing the report.\n'
+        + '\nApply the following guidance in evaluator mode only; it does not authorize implementation or change the JSON report schema.\n'
+        + frontendGuidance() + '\n';
+}
+
+async function launchReview(root, approve, options = {}) {
+    const { run, config } = await source(root, options), candidate = run.candidate;
+    requireValue(approve && !run.paused && candidate?.phase === 'review' && config.local?.mode === 'copilot-cli', 'Configure an approved isolated CLI evaluator or open the candidate in a separate workspace');
+    const data = context(candidate.workspace);
+    const prompt = reviewPrompt(run, config, candidate, data);
     try {
         await (options.local || require('./local.cjs')).launch(config.local, {
             workspace: candidate.workspace, prompt, base_sha: candidate.sha, report_path: data.report_path,
@@ -742,5 +749,5 @@ if (require.main === module) {
 module.exports = {
     plan, begin, dispatch, refresh, capture, publishLocal, attachPr, prepare, prepareDelivery, review, launchReview,
     acceptEvidence, merge, updatePr, reconcileUpdate, finish, recoverPublication, sync, recoverSync, status, context, assigned, assignmentPath,
-    reportPath, workerReport, main
+    reportPath, workerReport, reviewPrompt, main
 };

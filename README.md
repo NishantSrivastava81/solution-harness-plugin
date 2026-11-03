@@ -10,7 +10,7 @@ A single-install plugin that provides everything you need to build, refactor, an
 | Component | Count | Contents |
 |-----------|-------|----------|
 | **Agents** | 8 | ideator, planner, architect, builder, evaluator, reviewer, janitor, orchestrator |
-| **Skills** | 23 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check, /loop, /plan-execution, /parallel-loop, /cloud-parallel, /jira-plan, /hybrid-loop, /jira-sync |
+| **Skills** | 24 | /init-solution, /onboard, /add-features, /design-feature, /frontend-design, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check, /loop, /plan-execution, /parallel-loop, /cloud-parallel, /jira-plan, /hybrid-loop, /jira-sync |
 | **Hooks** | 4 | SessionStart (inject status), Stop (enforce progress log), PreToolUse (block dangerous commands), PostToolUse (trajectory logging) |
 
 ## Install
@@ -51,7 +51,7 @@ in GitHub's Agents UI or issue assignment dialog:
 > run all configured checks, and open a draft pull request. Stop on a blocker.
 
 The pilot supplies three cloud profiles (orchestrator, builder, evaluator), the
-17 existing skills, and a dedicated cloud-loop skill. It runs one approved
+18 shared skills, including frontend-design, and a dedicated cloud-loop skill. It runs one approved
 feature per session with bounded rework, real test gates, and durable reports.
 It is not a multi-feature scheduler, and local tests do not prove hosted-agent
 behavior. See [the cloud setup and acceptance guide](cloud/README.md) for details.
@@ -192,6 +192,40 @@ new local coordinator skills.
 node --test tests\jira.test.cjs tests\hybrid-local.test.cjs tests\hybrid.test.cjs
 ```
 
+### UI and UX Design
+
+Version 1.4 adds [frontend-design](skills/frontend-design/SKILL.md) for user
+journeys, deliberate visual design, existing component/token reuse, responsive
+layouts, interaction states, accessibility, and rendered browser verification.
+It is original harness guidance informed by the
+[linked design reference](https://agenticskills.io/skills/frontend-design),
+not a vendored third-party prompt.
+
+Use `/frontend-design` directly, or let the builder load it for UI work.
+`/design-feature` uses its designer workflow; independent evaluators apply its
+read-only review guidance. Existing story ownership, design approvals, and
+report schemas remain unchanged. Non-UI work does not acquire UI requirements.
+
+GH CLI-dispatched cloud and hybrid local developers receive the same bundled
+guidance in their briefs; hybrid CLI evaluators receive it in evaluator mode.
+This needs neither the cloud installer nor access to the reference website.
+The standalone hosted distribution includes the skill as well (19 skills total).
+Existing hosted installations require the usual reviewed bundle update.
+
+For example:
+
+```text
+/frontend-design
+Build this story's customer picker with the existing portal design system.
+Verify keyboard navigation, loading/error/empty states, and mobile layouts.
+```
+
+Reload the updated plugin to discover the new skill. Prompt and packaging tests:
+
+```powershell
+node --test tests\frontend-design.test.cjs
+```
+
 ## Plugin Structure
 
 ```
@@ -211,6 +245,7 @@ solution-harness-plugin/
 │   ├── onboard/SKILL.md               # /onboard — existing project setup
 │   ├── add-features/SKILL.md          # /add-features — plan new capabilities
 │   ├── design-feature/SKILL.md       # /design-feature — research & design before building
+│   ├── frontend-design/SKILL.md      # /frontend-design - UI/UX design, implementation, review
 │   ├── refine-design/SKILL.md        # /refine-design — iterate on design with feedback
 │   ├── refactor/SKILL.md              # /refactor — plan improvements
 │   ├── fix-issue/SKILL.md             # /fix-issue — diagnose & fix bugs

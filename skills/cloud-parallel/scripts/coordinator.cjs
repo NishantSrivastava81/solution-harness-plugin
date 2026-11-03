@@ -6,6 +6,7 @@ const crypto = require('node:crypto');
 const { spawnSync } = require('node:child_process');
 const model = require('../../../parallel/model.cjs');
 const shared = require('../../../parallel/runtime.cjs');
+const { frontendGuidance } = require('../../frontend-design/guidance.cjs');
 const { requireValue, readJson, hash, noLinks } = model;
 const { git, repository, atomicJson, absent, clean, checks, validateReview, replaceStatuses, startGuard } = shared;
 
@@ -230,7 +231,8 @@ function prompt(run, feature, story, scope) {
         'Read docs/PLAN.md, docs/ARCHITECTURE.md, and applicable repository instructions.',
         'Implement only this story and its allowed paths. Add meaningful tests and run relevant checks.',
         'Do not edit shared feature, backlog, progress, evaluation, instructions, hook, or harness files.',
-        'Do not approve or merge the PR. Report actual checks and blockers; the local coordinator reviews and integrates it.'
+        'Do not approve or merge the PR. Report actual checks and blockers; the local coordinator reviews and integrates it.',
+        frontendGuidance()
     ].filter(Boolean).join('\n') + '\n';
 }
 

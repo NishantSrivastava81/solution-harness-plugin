@@ -514,7 +514,7 @@ test('installer preflights conflicts, preserves customized instructions/config a
     const cloud = cloudInstaller.buildBundle();
     assert.equal(cloud.has('.github/skills/plan-execution/SKILL.md'), false);
     assert.equal(cloud.has('.github/skills/parallel-loop/SKILL.md'), false);
-    assert.equal([...cloud.keys()].filter(file => file.endsWith('/SKILL.md')).length, 18);
+    assert.equal([...cloud.keys()].filter(file => file.endsWith('/SKILL.md')).length, 19);
 });
 
 test('installer and edit guards reject linked parent directories without following them', t => {

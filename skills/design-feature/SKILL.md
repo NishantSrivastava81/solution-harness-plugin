@@ -30,6 +30,12 @@ If not specified, pick the highest-priority `"not-started"` feature from docs/FE
 3. Read `docs/PLAN.md` — understand the broader context and tech stack
 4. Read the existing codebase — identify integration points, existing patterns, related code
 
+For a UI feature, load `/frontend-design` in designer mode. Include the user
+journey, existing components/tokens, responsive behavior, interaction states,
+accessibility, and a browser-verification plan in the existing design document.
+Resolve consequential design choices before approval; this does not authorize
+implementation or replace the feature's agreed scope.
+
 ### Step 2: Research Latest Patterns and Approaches
 Use web search to research:
 - **Current best practices** for this type of feature (e.g., "best practices for JWT authentication in FastAPI 2026")

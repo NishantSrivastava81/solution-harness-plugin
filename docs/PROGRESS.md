@@ -111,3 +111,27 @@ the requested harness change without creating or changing application features.
 
 The plugin has no feature catalog to update. Application Source IDs and plans
 were not generated or modified by this implementation.
+
+## 2026-11-03 - Frontend UI and UX design guidance
+
+* Added version 1.4.0 and the automatically discoverable `/frontend-design`
+  skill. Authored original harness guidance with an optional reference to the
+  user-provided design resource rather than vendoring its prompt.
+* Covered user journeys, existing design-system reuse, purposeful visual
+  hierarchy, responsive layouts, interaction states, accessibility, and actual
+  browser verification. Existing scope, design approvals, and role/report
+  restrictions remain authoritative.
+* Connected feature design, local builders/evaluators, and hosted profiles.
+  Added one shared guidance reader for cloud/hybrid developer briefs and
+  read-only hybrid CLI review prompts, without requiring the cloud installer
+  or an external fetch. Non-UI tasks acquire no UI requirements.
+* Updated local/hosted metadata, documentation, bundle-count assertions, and CI.
+  The local plugin now has 24 skills; the hosted distribution has 19 and still
+  excludes local-only coordinators.
+* Validated seven new prompt/metadata/packaging tests and seven targeted existing
+  regressions on Node.js 24.21.0. Included actual isolated CLI fixture execution
+  for both developer and evaluator briefs, cloud dispatch, reproducible bundle
+  hashes, installer preservation, and local assignment metadata.
+* No application UI, live provider task, Jira data, or remote Git history was
+  changed. Packaging and fake-process tests do not establish rendered UI quality
+  or live hosted-agent behavior.

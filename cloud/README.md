@@ -98,6 +98,13 @@ orchestrator and give a bounded task, for example:
 The builder and evaluator are subagent-only profiles. The initial cloud pilot
 does not export the other five interactive IDE agent profiles. Their planning
 and maintenance skills are bundled; the original local agents remain unchanged.
+UI builders and evaluators use the bundled
+[frontend-design skill](../skills/frontend-design/SKILL.md) for their assigned
+role, preserving existing design systems, scope, and JSON report formats.
+The distribution now includes 19 skills, including cloud-loop. Existing
+installations require a reviewed bundle update; browser availability and visual
+quality are not proven by packaging tests.
+
 Skills are discovered from descriptions/task context: do not assume an IDE-style
 slash-command picker exists on every cloud entry point.
 

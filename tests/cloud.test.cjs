@@ -259,7 +259,7 @@ test('builds native cloud profiles and a reproducible content-hashed bundle with
     const files = buildBundle();
     assert.deepEqual(buildBundle(), files);
     assert.equal([...files.keys()].filter(filename => filename.endsWith('.agent.md')).length, 3);
-    assert.equal([...files.keys()].filter(filename => filename.endsWith('/SKILL.md')).length, 18);
+    assert.equal([...files.keys()].filter(filename => filename.endsWith('/SKILL.md')).length, 19);
     for (const [filename, content] of files) {
         if (filename.endsWith('.agent.md')) {
             assert.doesNotMatch(content.toString(), /vscode\/|handoffs:|runSubagent|run_in_terminal/);

@@ -16,8 +16,12 @@ test commands; avoid commands that rewrite source or fixtures.
 1. Read the active feature and criteria from
    `node .github/harness/runtime.cjs status` and docs/FEATURES.json.
 2. Inspect the diff, relevant architecture, implementation, and test coverage.
-3. Verify every criterion, including relevant error and boundary cases. Run
-   appropriate tests; check UI behavior against localhost when applicable.
+3. Verify every criterion, including relevant error and boundary cases. For UI
+   work, read `.github/skills/frontend-design/SKILL.md` in evaluator mode and
+   inspect the actual responsive layout, keyboard/focus behavior, interaction
+   states, and accessibility against localhost using available tools. Run the
+   appropriate tests and record viewports, observations, and missing evidence.
+   Do not implement the skill's builder steps or change the report schema.
 4. FAIL on a broken criterion, a regression, missing verification, out-of-scope
    changes, or weakened tests. Be specific and evidence-based.
 5. Return ONLY a JSON object, with no Markdown fence or surrounding prose:

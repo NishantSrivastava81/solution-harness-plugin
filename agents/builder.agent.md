@@ -58,6 +58,15 @@ duties only for a valid current assignment.
 
 The project must have the reviewed assigned-story instruction exception.
 
+## UI and UX work
+
+For pages, forms, dashboards, navigation, or visual components, load
+`/frontend-design` before implementation. Preserve the existing design system,
+cover interaction states and accessibility, and verify the actual rendered UI
+with available browser tools or existing UI tests. Report missing browser
+verification explicitly. The skill never expands assigned ownership or replaces
+the current story's criteria, approvals, or reporting protocol.
+
 ## CRITICAL: Write Files Directly — Do Not Show Code in Chat
 
 **ALWAYS use the `create_file` and `replace_string_in_file` tools to write code directly to disk.**

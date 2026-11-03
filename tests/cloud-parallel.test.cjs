@@ -284,7 +284,7 @@ test('keeps the local cloud coordinator out of the hosted cloud bundle', () => {
     const bundle = cloudInstaller.buildBundle();
     assert.equal(bundle.has('.github/skills/cloud-parallel/SKILL.md'), false);
     assert.equal(bundle.has('.github/skills/cloud-parallel/scripts/coordinator.cjs'), false);
-    assert.equal([...bundle.keys()].filter(file => file.endsWith('/SKILL.md')).length, 18);
+    assert.equal([...bundle.keys()].filter(file => file.endsWith('/SKILL.md')).length, 19);
     const skill = fs.readFileSync(path.join(__dirname, '../skills/cloud-parallel/SKILL.md'), 'utf8');
     assert.match(skill, /^---\r?\nname: cloud-parallel\r?\ndescription: "[^"\r\n]+"/);
     assert.match(skill, /--match-head-commit/);

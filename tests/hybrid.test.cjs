@@ -372,6 +372,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const runtime = require(${JSON.stringify(path.resolve(__dirname, '../hybrid/runtime.cjs'))});
 const cwd = process.cwd(), context = runtime.context(cwd);
+if(!process.argv[2].includes('# Frontend Design')) throw new Error('Missing bundled UI guidance');
 if(context.role === 'builder') {
   fs.writeFileSync(path.join(cwd, 'src/beta.cjs'), 'module.exports = 1;\\n');
   runtime.workerReport(cwd);
@@ -402,5 +403,5 @@ test('new manual skills stay out of the hosted single-feature bundle', () => {
     for (const name of ['jira-plan', 'hybrid-loop', 'jira-sync']) {
         assert.equal(files.has(`.github/skills/${name}/SKILL.md`), false);
     }
-    assert.equal([...files.keys()].filter(name => name.endsWith('/SKILL.md')).length, 18);
+    assert.equal([...files.keys()].filter(name => name.endsWith('/SKILL.md')).length, 19);
 });
