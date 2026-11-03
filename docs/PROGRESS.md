@@ -42,3 +42,25 @@ description: Delivery and validation records for changes to the harness plugin.
 
 The plugin repository has no feature catalog to mark complete. This entry records
 the requested harness change without creating or changing application features.
+
+## 2026-11-03 - Cloud-built parallel stories
+
+* Added the opt-in /cloud-parallel workflow for up to three independent GitHub
+  cloud story tasks across approved features, without installing a runtime into
+  the target repository. Reused the existing story graph, ownership, and checks.
+* Added local exact-commit evaluation, serial SHA-guarded PR merges, current-base
+  checks, merge reconciliation, full-feature review, and post-merge local status
+  publication. Ambiguous task creation and merging require explicit recovery.
+* Added privacy-preserving local hook routing and mutually exclusive local/cloud
+  coordinator runs. Existing hosted cloud-loop behavior remains the default;
+  already installed cloud hooks require an explicit story-mode migration.
+* Added 22 mocked-GitHub and real-Git integration cases. All passed on Windows
+  with Node.js 22.20.0 and 24.22.0. On Node.js 24, 18 existing cloud cases
+  and nine targeted local-parallel regressions passed; five scheduler and
+  packaging checks also passed on Node.js 22. The existing Windows file-symlink case was
+  excluded because it fails at symlink creation with EPERM. An unfiltered
+  baseline did not finish within 12 minutes and was stopped.
+* Verified the installed GitHub CLI 2.103.3 command options without launching a
+  hosted task. The local default PATH still resolves Node.js 12 and does not
+  include GitHub CLI; users must provide supported versions on the agent PATH.
+  Hosted agent behavior and the new Windows/Linux CI matrix remain unverified.

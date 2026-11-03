@@ -10,7 +10,7 @@ A single-install plugin that provides everything you need to build, refactor, an
 | Component | Count | Contents |
 |-----------|-------|----------|
 | **Agents** | 8 | ideator, planner, architect, builder, evaluator, reviewer, janitor, orchestrator |
-| **Skills** | 19 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check, /loop, /plan-execution, /parallel-loop |
+| **Skills** | 20 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check, /loop, /plan-execution, /parallel-loop, /cloud-parallel |
 | **Hooks** | 4 | SessionStart (inject status), Stop (enforce progress log), PreToolUse (block dangerous commands), PostToolUse (trajectory logging) |
 
 ## Install
@@ -142,7 +142,7 @@ Use Node.js 22.20+ or 24+. Review instruction migration, real verification comma
 ownership, and approvals before starting. Workers must be opened in separate
 verified workspaces; terminal `cwd` is not editing-tool isolation. Automatic
 worker launch, multi-feature scheduling, and hosted parallelism are deferred.
-The cloud installer excludes the two local-only skills.
+The cloud installer excludes the local-only coordinator skills.
 
 See the [local execution and recovery guide](parallel/README.md) for the story
 schema, command sequence, operator approvals, limits, and cleanup. Runtime tests:
@@ -150,6 +150,19 @@ schema, command sequence, operator approvals, limits, and cleanup. Runtime tests
 ```powershell
 node --test tests\parallel.test.cjs
 ```
+
+### Cloud-built Parallel Stories
+
+Use the local orchestrator with `/cloud-parallel` to dispatch independent
+stories through GitHub CLI. Cloud agents build separate PRs; a separate local
+evaluator reviews exact commits and the coordinator integrates them serially.
+The workflow is opt-in and does not require the local parallel installer.
+
+Use GitHub CLI 2.80+ with an eligible Copilot plan, Node.js 22.20+ or 24+,
+Git, approved story scopes, real verification commands, and repository review
+protections. See the [cloud parallel skill](skills/cloud-parallel/SKILL.md) for
+configuration, guarded merge, and recovery. Run the coordinator tests with
+`node --test tests\cloud-parallel.test.cjs`.
 
 ## Plugin Structure
 
@@ -184,6 +197,7 @@ solution-harness-plugin/
 │   ├── architecture-check/SKILL.md   # /architecture-check — boundary verification
 │   ├── loop/SKILL.md                 # /loop — sequential goal-bounded build loop
 │   ├── plan-execution/SKILL.md       # /plan-execution — local story dry-run planning
+│   ├── cloud-parallel/SKILL.md       # /cloud-parallel - cloud builders, local review
 │   └── parallel-loop/SKILL.md        # /parallel-loop — isolated local story execution
 ├── parallel/                          # Local model, coordinator, hooks, schema, and guide
 ├── hooks/

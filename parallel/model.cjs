@@ -156,6 +156,29 @@ function conflicts(first, second) {
         || first.resources.some(item => second.resources.includes(item));
 }
 
+function validateVerification(verification) {
+    requireValue(Array.isArray(verification), 'verification must be an array');
+    for (const check of verification) {
+        requireValue(typeof check.name === 'string' && check.name.trim() && typeof check.command === 'string' && check.command.trim(), 'Checks require a name and executable');
+        requireValue(Array.isArray(check.args) && check.args.every(arg => typeof arg === 'string' && !arg.includes('\0')), 'Check arguments must be strings without NUL characters');
+        requireValue(['setup', 'test', 'lint', 'build'].includes(check.kind), 'Invalid check kind');
+        requireValue(Number.isInteger(check.timeout_seconds) && check.timeout_seconds > 0 && check.timeout_seconds <= 3600, 'Invalid check timeout');
+    }
+    requireValue(new Set(verification.map(check => check.name)).size === verification.length, 'Verification names must be unique');
+    return verification;
+}
+
+function validateOwnership(ownership) {
+    requireValue(ownership && typeof ownership === 'object' && !Array.isArray(ownership), 'ownership must be an object');
+    for (const [id, scope] of Object.entries(ownership)) {
+        requireValue(STORY.test(id), 'Invalid ownership story');
+        strings(scope.allowed_paths, `${id} allowed paths`);
+        strings(scope.resources, `${id} resources`);
+        for (const pattern of scope.allowed_paths) relativePath(pattern);
+    }
+    return ownership;
+}
+
 function parseConfig(value) {
     requireValue(value?.version === 1, 'Parallel config version must be 1');
     requireValue(['sequential', 'parallel-stories'].includes(value.mode), 'Only sequential and local parallel-stories modes are supported');
@@ -168,21 +191,8 @@ function parseConfig(value) {
         ['max_workers', 1, 3], ['max_minutes', 1, 1440], ['max_attempts', 1, 5],
         ['max_commits', 1, 100], ['lease_minutes', 1, 240]
     ]) requireValue(Number.isInteger(value[key]) && value[key] >= min && value[key] <= max, `Invalid ${key}`);
-    requireValue(Array.isArray(value.verification), 'verification must be an array');
-    for (const check of value.verification) {
-        requireValue(typeof check.name === 'string' && check.name.trim() && typeof check.command === 'string' && check.command.trim(), 'Checks require a name and executable');
-        requireValue(Array.isArray(check.args) && check.args.every(arg => typeof arg === 'string' && !arg.includes('\0')), 'Check arguments must be strings without NUL characters');
-        requireValue(['setup', 'test', 'lint', 'build'].includes(check.kind), 'Invalid check kind');
-        requireValue(Number.isInteger(check.timeout_seconds) && check.timeout_seconds > 0 && check.timeout_seconds <= 3600, 'Invalid check timeout');
-    }
-    requireValue(new Set(value.verification.map(check => check.name)).size === value.verification.length, 'Verification names must be unique');
-    requireValue(value.ownership && typeof value.ownership === 'object' && !Array.isArray(value.ownership), 'ownership must be an object');
-    for (const [id, scope] of Object.entries(value.ownership)) {
-        requireValue(STORY.test(id), 'Invalid ownership story');
-        strings(scope.allowed_paths, `${id} allowed paths`);
-        strings(scope.resources, `${id} resources`);
-        for (const pattern of scope.allowed_paths) relativePath(pattern);
-    }
+    validateVerification(value.verification);
+    validateOwnership(value.ownership);
     return value;
 }
 
@@ -269,5 +279,6 @@ function plan(project, featureId) {
 
 module.exports = {
     parseModel, parseConfig, loadProject, plan, readyStories, isSatisfied,
-    requireValue, readJson, hash, allowed, overlap, conflicts, protectedPaths, noLinks
+    requireValue, readJson, hash, allowed, overlap, conflicts, protectedPaths, noLinks,
+    strings, relativePath, validateVerification, validateOwnership
 };

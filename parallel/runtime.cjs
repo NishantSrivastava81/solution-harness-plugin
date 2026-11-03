@@ -208,6 +208,7 @@ function begin(root, featureId, approve = false) {
     return coordinator(root, (cwd, loc) => {
         requireValue(approve, 'begin requires --approve');
         requireValue(absent(loc.active), 'A run already exists; resume, finish, or cancel it first');
+        requireValue(absent(path.join(loc.common, 'solution-harness', 'cloud-parallel', 'active.json')), 'A cloud parallel run is active; pause and finish it before starting local parallel work');
         clean(cwd);
         const project = loadProject(cwd);
         const { config, model } = project;
@@ -781,5 +782,6 @@ if (require.main === module) {
 module.exports = {
     begin, claim, context, assigned, workerReport, workerBlock, capture, prepareReview, reviewReport, accept,
     recover, abortCandidate, release, heartbeat, checkpoint, recoverLock, cleanup, status,
-    locations, readRun, readAssignment, assignmentPath, git, fingerprint, replaceStatuses, noLinks, validateReview, main
+    locations, readRun, readAssignment, assignmentPath, git, fingerprint, replaceStatuses, noLinks, validateReview,
+    repository, atomicJson, absent, clean, checks, main
 };

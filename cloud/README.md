@@ -77,6 +77,16 @@ review upstream changes and reconcile modified files explicitly.
 5. Review and merge the customizations, approved config, and setup workflow
    into the target's default branch before starting the pilot.
 
+## Cloud Stories With Local Review
+
+The local `/cloud-parallel` skill can dispatch independent stories to GitHub
+cloud agents and review and integrate their PRs locally. It does not need this
+cloud installation. If this cloud distribution is already installed in the
+target, reconcile the updated runtime and instructions, set
+`cloud_parallel_enabled` to `true`, and merge those changes before dispatch.
+The default is false; ordinary cloud-loop sessions keep their existing gates.
+Review project instructions and branch protections before enabling story mode.
+
 ## Start A Cloud Task
 
 From GitHub's Agents UI or an issue's Copilot assignment dialog, select

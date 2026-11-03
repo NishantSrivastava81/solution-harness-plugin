@@ -8,7 +8,10 @@ on:
       - "skills/**"
       - "hooks/**"
       - "scripts/install-*.cjs"
+      - "scripts/cloud-parallel-hook.cjs"
+      - "cloud/**"
       - "tests/parallel.test.cjs"
+      - "tests/cloud-parallel.test.cjs"
       - ".github/workflows/parallel-tests.yml"
   push:
     paths:
@@ -17,7 +20,10 @@ on:
       - "skills/**"
       - "hooks/**"
       - "scripts/install-*.cjs"
+      - "scripts/cloud-parallel-hook.cjs"
+      - "cloud/**"
       - "tests/parallel.test.cjs"
+      - "tests/cloud-parallel.test.cjs"
       - ".github/workflows/parallel-tests.yml"
 
 permissions:
@@ -38,3 +44,20 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: node --test tests/parallel.test.cjs
+
+  cloud-parallel:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ["22.20.0", "24.x"]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --test tests/cloud-parallel.test.cjs

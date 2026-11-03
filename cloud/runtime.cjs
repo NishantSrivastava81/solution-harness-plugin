@@ -37,8 +37,9 @@ function loadConfig(root) {
         || !config.feature_ids.every(identifier => typeof identifier === 'string' && identifier.trim())
         || new Set(config.feature_ids).size !== config.feature_ids.length
         || !Number.isInteger(config.max_minutes) || config.max_minutes < 1 || config.max_minutes > 45
-        || !Number.isInteger(config.max_rework) || config.max_rework < 0 || config.max_rework > 2) {
-        throw new Error('Invalid cloud config: version, feature_ids, max_minutes (1-45), or max_rework (0-2).');
+        || !Number.isInteger(config.max_rework) || config.max_rework < 0 || config.max_rework > 2
+        || (config.cloud_parallel_enabled !== undefined && typeof config.cloud_parallel_enabled !== 'boolean')) {
+        throw new Error('Invalid cloud config: version, feature_ids, max_minutes (1-45), max_rework (0-2), or cloud_parallel_enabled.');
     }
     if (!Array.isArray(config.verification) || !config.verification.length
         || !config.verification.some(check => check.kind === 'test')
@@ -111,6 +112,9 @@ function begin(root, featureId) {
     const state = readState(root);
     if (!state) {
         throw new Error('Missing cloud session. Confirm that the sessionStart hook is installed and loaded.');
+    }
+    if (state.mode === 'cloud-story') {
+        throw new Error('A cloud story assignment is reviewed locally and cannot start cloud-loop.');
     }
     if (state.featureId) {
         throw new Error('Only one feature may be started per cloud session.');
@@ -288,11 +292,22 @@ function handleHook(root, event, payload) {
         if (typeof sessionId !== 'string' || !sessionId) {
             throw new Error('The sessionStart payload must include a session ID.');
         }
-        if (!payload.parentAgentId && !payload.parent_agent_id && readState(root)?.sessionId !== sessionId) {
+        const previous = readState(root);
+        let mode = previous?.mode || 'cloud-loop';
+        if (!payload.parentAgentId && !payload.parent_agent_id && previous?.sessionId !== sessionId) {
+            const prompt = payload.initial_prompt ?? process.env.COPILOT_AGENT_PROMPT ?? '';
+            const story = typeof prompt === 'string' && prompt.startsWith('Solution Harness cloud story assignment v1\n');
+            if (story && readJson(root, '.github/harness/config.json').cloud_parallel_enabled !== true) {
+                throw new Error('Cloud story assignments require explicit cloud_parallel_enabled approval.');
+            }
+            mode = story ? 'cloud-story' : 'cloud-loop';
             saveState(root, {
-                sessionId, rootAgentId: payload.agentId ?? payload.agent_id ?? null,
+                sessionId, mode, rootAgentId: payload.agentId ?? payload.agent_id ?? null,
                 startedAt: Date.now(), featureId: null, finalized: false
             });
+        }
+        if (mode === 'cloud-story') {
+            return { additionalContext: 'Approved cloud story mode: implement only the assigned story and allowed paths. Add tests; do not edit shared planning, progress, evaluation, or harness files. The local coordinator independently reviews and merges the PR. Do not run cloud-loop, self-approve, commit, push, or merge.' };
         }
         return { additionalContext: 'Solution Harness cloud mode: use the orchestrator and cloud-loop skill for one approved feature. Run begin, baseline verification, separate builder and evaluator, final verification, then finish. Never skip tests or commit/push/merge yourself. Read .github/harness/config.json and docs/PROGRESS.md.' };
     }

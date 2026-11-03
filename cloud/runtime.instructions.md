@@ -1,4 +1,5 @@
 ---
+description: "Guard cloud feature and explicitly approved story assignments"
 applyTo: "**"
 excludeAgent: "code-review"
 ---
@@ -8,12 +9,20 @@ excludeAgent: "code-review"
 These instructions apply only when running in GitHub Copilot cloud agent.
 In a local IDE, keep the repository's existing plugin and interactive workflows.
 
-For cloud implementation, select the orchestrator profile and use cloud-loop.
+For a prompt beginning `Solution Harness cloud story assignment v1`, use the
+assigned story mode only when `.github/harness/config.json` explicitly sets
+`cloud_parallel_enabled` to true. Implement only that story and its allowed
+paths. Add tests, but do not edit shared planning, progress, evaluation, harness
+configuration, or hooks. The local coordinator performs independent review,
+verification, and approved PR integration. Do not run cloud-loop or claim that
+the story or feature is complete.
+
+For other cloud implementation, select the orchestrator profile and use cloud-loop.
 Build one explicitly requested, allowlisted feature per session. Require a green
 baseline, separate builder and evaluator subagents, and all configured checks.
 Do not treat a builder's self-assessment as independent verification.
 
-The runtime owns feature-status transitions and progress/evaluation records.
+In cloud-loop mode, the runtime owns feature-status transitions and progress/evaluation records.
 Never edit its receipts or bypass its gates. Do not change tests, acceptance
 criteria, configuration, hooks, or workflow policy to make a failed gate pass.
 The builder may add appropriate tests, but must not weaken existing ones.
@@ -28,6 +37,8 @@ Use portable tool capabilities, not VS Code extension tool IDs. External
 research, package registries, and services require the appropriate firewall and
 Agents-secret configuration. Never include secrets in prompts, receipts, or logs.
 
-Working budgets do not extend GitHub's session limit. Save a durable checkpoint
-with runtime.cjs finish before ending. Let the platform manage branch commits,
-pushes, and PR creation. Required CI and human review/merge remain mandatory.
+Working budgets do not extend GitHub's session limit. In cloud-loop mode, save
+a durable checkpoint with runtime.cjs finish before ending. In story mode,
+report your actual checks and blockers to the local coordinator through the PR.
+Let the platform manage branch commits, pushes, and PR creation. Repository
+review and merge requirements remain mandatory.

@@ -39,6 +39,14 @@ full-feature review before final publication. Workers do not write global
 status/progress. Pause before handing off; do not steal leases, reset budgets,
 force merges, or push. Use explicit runtime recovery commands on interruption.
 
+## Opt-in cloud parallel story mode
+
+Only an explicit `/cloud-parallel` request activates this mode. Follow that skill
+instead of the sequential and local-worktree loops. Delegate approved independent
+stories to GitHub cloud agents, review exact PR commits locally with a separate
+evaluator, and integrate serially only after the configured gates and approval.
+Do not treat cloud builders as reviewers or publish completion before merge.
+
 ## PRINCIPLE: Design the Loop, Not the Prompt (Loop Engineering — Osmani / Cherny)
 The leverage point has moved from typing the next instruction to designing the
 system that issues instructions. A loop is a recursive goal: a purpose is defined,

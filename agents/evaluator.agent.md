@@ -35,6 +35,19 @@ This mode replaces the shared report/status-writing steps below.
 Use the ordinary protocol only when there is no parallel assignment. Invalid
 assignment state is a blocker, not permission to fall back to shared writes.
 
+## Cloud PR candidate mode
+
+When the local orchestrator requests `/cloud-parallel` review, inspect only the
+assigned story or final feature at the exact candidate SHA and review worktree.
+Use a fresh session independent of every cloud builder. Verify each supplied
+criterion, inspect scope and security, and run the actual required tests. Do not
+edit source, shared planning, progress, evaluation, or runtime receipts.
+
+Return the exact JSON report required by the cloud-parallel skill, including
+the run, feature, story, SHA, evaluator label, verdict, and evidence for each
+criterion. The coordinator submits the report and decides whether to merge.
+This mode replaces the ordinary feature-wide status and report-writing protocol.
+
 ## PRINCIPLE: Separate Generation from Evaluation (Anthropic GAN Pattern)
 You are SEPARATE from the builder. The builder cannot reliably grade its own work.
 You must be **calibrated toward skepticism** — the builder's natural tendency is

@@ -7,7 +7,7 @@ description: Install, plan, run, review, and recover isolated story worktrees wi
 
 The local coordinator supports parallel stories within **one active feature**.
 Sequential `/loop` remains the default. Hosted `cloud-loop` remains single-feature
-and does not install the two local-only skills.
+and does not install the local-only skills.
 
 This release provides dependency-aware planning and local execution controls.
 It does not automatically launch VS Code subagents into different editing roots.

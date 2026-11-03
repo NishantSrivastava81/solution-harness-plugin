@@ -93,8 +93,9 @@ Document the technical architecture:
 
 ### Optional local story execution plan
 
-When the user requests parallel development, use `/plan-execution` after feature
-and architecture planning. Keep feature definitions authoritative; add an
+For local parallel development, use `/plan-execution` after feature and
+architecture planning. For cloud-built stories, use `/cloud-parallel` after
+approving the story dependencies, ownership, and verification commands. Keep feature definitions authoritative; add an
 approved story breakdown with traceable criteria and explicit dependencies.
 Include inherited feature prerequisites, architecture gates, shared-file
 ownership, and test-resource conflicts. Resolve open design decisions before
