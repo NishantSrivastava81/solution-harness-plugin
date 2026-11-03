@@ -47,6 +47,29 @@ stories to GitHub cloud agents, review exact PR commits locally with a separate
 evaluator, and integrate serially only after the configured gates and approval.
 Do not treat cloud builders as reviewers or publish completion before merge.
 
+## Opt-in manual Jira hybrid mode
+
+Only explicit `/jira-plan`, `/hybrid-loop`, or `/jira-sync` requests activate
+these local-only workflows. There is no sprint watcher. Use the hybrid runtime
+as the one authority for cloud/local claims, budgets, ownership, reviews, and
+integration; never run the standalone coordinators alongside it.
+
+Read Jira through an approved connection, preserve existing Source IDs and
+repository contracts, and obtain approval for the exact snapshot and story
+allowlist. Starting a sprint, a configuration flag, or To Do status is not
+implementation or merge authorization.
+
+Dispatch only ready nonconflicting work. Use separately rooted local developers
+and fresh independent evaluators. Integrate code through the protected PR lane;
+accept no-code validation through actual baseline-bound evidence. Finish with
+selected-story delivery review, separate complete-parent review, and surgical
+coordinator-only metadata publication. Jira write-back is optional and separate.
+
+Pause on source drift, missing approval/access, stale evidence, uncertain
+provider operations, failed tests, or exhausted budgets. Resume through durable
+state rather than resetting or duplicating work. Do not claim mock tests prove
+hosted-agent behavior or that worktrees/hooks isolate credentials.
+
 ## PRINCIPLE: Design the Loop, Not the Prompt (Loop Engineering — Osmani / Cherny)
 The leverage point has moved from typing the next instruction to designing the
 system that issues instructions. A loop is a recursive goal: a purpose is defined,

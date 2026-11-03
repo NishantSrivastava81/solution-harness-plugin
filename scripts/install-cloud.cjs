@@ -98,7 +98,7 @@ function copyTree(files, source, destination, excluded = new Set()) {
 function buildBundle(sourceRoot = path.resolve(__dirname, '..')) {
     const files = new Map();
     copyTree(files, path.join(sourceRoot, 'cloud/agents'), '.github/agents');
-    copyTree(files, path.join(sourceRoot, 'skills'), '.github/skills', new Set(['plan-execution', 'parallel-loop', 'cloud-parallel']));
+    copyTree(files, path.join(sourceRoot, 'skills'), '.github/skills', new Set(['plan-execution', 'parallel-loop', 'cloud-parallel', 'jira-plan', 'hybrid-loop', 'jira-sync']));
     copyTree(files, path.join(sourceRoot, 'cloud/skills'), '.github/skills');
     for (const [source, destination] of [
         ['cloud/runtime.cjs', '.github/harness/runtime.cjs'],

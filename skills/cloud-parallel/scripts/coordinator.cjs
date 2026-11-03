@@ -7,7 +7,7 @@ const { spawnSync } = require('node:child_process');
 const model = require('../../../parallel/model.cjs');
 const shared = require('../../../parallel/runtime.cjs');
 const { requireValue, readJson, hash, noLinks } = model;
-const { git, repository, atomicJson, absent, clean, checks, validateReview, replaceStatuses } = shared;
+const { git, repository, atomicJson, absent, clean, checks, validateReview, replaceStatuses, startGuard } = shared;
 
 const MARKER = 'Solution Harness cloud story assignment v1';
 const SESSION = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
@@ -44,6 +44,8 @@ function parseConfig(root, filename) {
     model.validateVerification(config.verification);
     requireValue(config.verification.some(check => check.kind === 'test'), 'Configure at least one real test command');
     model.validateOwnership(config.ownership);
+    if (config.story_ids !== undefined) model.strings(config.story_ids, 'Approved stories', { empty: false });
+    if (config.execution_mode !== undefined) requireValue(config.execution_mode === 'hybrid-stories', 'Unsupported execution mode');
     return config;
 }
 
@@ -70,12 +72,15 @@ function load(root, configPath) {
             requireValue(fs.statSync(design).isFile(), `Design document for ${id} must be a file`);
             designs[id] = hash(fs.readFileSync(design));
         }
-        for (const story of feature.stories) {
+        for (const story of feature.stories.filter(story => !config.story_ids || config.story_ids.includes(story))) {
             if (project.stories.get(story).status !== 'done') requireValue(config.ownership[story], `Missing ownership for ${story}`);
         }
     }
     for (const id of config.approved_designs) requireValue(project.features.has(id), `Unknown approved design ${id}`);
     for (const id of Object.keys(config.ownership)) requireValue(project.stories.has(id), `Unknown ownership story ${id}`);
+    for (const id of config.story_ids || []) {
+        requireValue(project.stories.has(id) && config.feature_ids.includes(project.stories.get(id).feature_id), `Unknown or out-of-scope story ${id}`);
+    }
     return {
         config, model: project, features, backlog,
         inputs: { config: hash(JSON.stringify(config)), features: hash(JSON.stringify(features)), backlog: hash(JSON.stringify(backlog)), progress: hash(progress), plan: hash(plan), architecture: hash(architecture), designs }
@@ -157,8 +162,8 @@ function checkInstalledCloud(root) {
         'Migrate the installed cloud runtime and instructions, enable cloud_parallel_enabled, and merge them before dispatch');
 }
 
-function begin(root, configPath, approve, gh = github) {
-    return locked(root, (cwd, loc) => {
+function begin(root, configPath, approve, gh = github, source = null) {
+    return startGuard(root, () => locked(root, (cwd, loc) => {
         requireValue(approve, 'begin requires --approve');
         requireValue(absent(loc.active), 'A cloud parallel run already exists');
         requireValue(absent(path.join(loc.common, 'solution-harness', 'parallel', 'active.json')), 'A local parallel run is active; finish it before starting cloud work');
@@ -167,6 +172,8 @@ function begin(root, configPath, approve, gh = github) {
         configPath = path.resolve(cwd, configPath);
         const project = load(cwd, configPath);
         const { config } = project;
+        requireValue((config.execution_mode === 'hybrid-stories') === Boolean(source), 'Use the Jira hybrid runtime to begin a hybrid run');
+        if (source) require('../../../hybrid/plan.cjs').assertExecutable(project, source, config);
         requireValue(git(cwd, ['branch', '--show-current']) === config.base_branch, 'Coordinator must be on the configured base branch');
         checkInstalledCloud(cwd);
         const version = gh(cwd, ['--version']);
@@ -181,6 +188,11 @@ function begin(root, configPath, approve, gh = github) {
             inputs: project.inputs, status: 'starting', started_at: new Date().toISOString(),
             base_sha: base, repository: config.repository, features: {}, jobs: {}, candidate: null, paused: false
         };
+        if (source) {
+            run.mode = 'hybrid';
+            run.source = source;
+            run.builder_ids = [];
+        }
         save(loc, run);
         atomicJson(loc.active, { id: run.id });
         try {
@@ -194,23 +206,26 @@ function begin(root, configPath, approve, gh = github) {
             throw error;
         }
         return { run_id: run.id, base_sha: base, baseline: run.baseline, feature_ids: config.feature_ids };
-    });
+    }));
 }
 
 function ready(run, project, config) {
-    const integrated = new Set(Object.values(run.jobs).filter(job => job.status === 'merged').map(job => job.id));
+    const integrated = new Set(Object.values(run.jobs).filter(job => ['merged', 'verified'].includes(job.status)).map(job => job.id));
     const unavailable = new Set(Object.values(run.jobs).filter(job => job.status !== 'abandoned').map(job => job.id));
-    const outstanding = Object.values(run.jobs).filter(job => !['merged', 'abandoned'].includes(job.status));
+    const outstanding = Object.values(run.jobs).filter(job => !['merged', 'verified', 'abandoned'].includes(job.status));
     return config.feature_ids.map(id => project.features.get(id))
         .sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id))
         .flatMap(feature => model.readyStories(project, feature.id, integrated, unavailable))
-        .filter(story => config.ownership[story.id] && !outstanding.some(job => model.conflicts(config.ownership[story.id], job.scope)));
+        .filter(story => (!config.story_ids || config.story_ids.includes(story.id))
+            && config.ownership[story.id] && !outstanding.some(job => model.conflicts(config.ownership[story.id], job.scope)))
+        .sort((a, b) => config.story_ids ? config.story_ids.indexOf(a.id) - config.story_ids.indexOf(b.id) : 0);
 }
 
 function prompt(run, feature, story, scope) {
     return [MARKER, `Run: ${run.id}`, `Feature: ${feature.id} - ${feature.name || feature.id}`,
         `Story: ${story.id} - ${story.title}`, `Acceptance criteria: ${JSON.stringify(story.acceptance_criteria)}`,
         `Allowed paths: ${JSON.stringify(scope.allowed_paths)}`, `Shared resources: ${JSON.stringify(scope.resources)}`,
+        run.source ? `Approved Jira source: ${run.source.issues.find(issue => issue.source_id === story.id)?.url}; revision ${run.source.digest}` : '',
         feature.design_doc ? `Read the approved design document: ${feature.design_doc}` : '',
         'Read docs/PLAN.md, docs/ARCHITECTURE.md, and applicable repository instructions.',
         'Implement only this story and its allowed paths. Add meaningful tests and run relevant checks.',
@@ -239,7 +254,7 @@ function created(output, repo) {
     return { job_id: queued[1], status: 'awaiting-reference' };
 }
 
-function dispatch(root, storyId, approve, gh = github) {
+function dispatch(root, storyId, approve, gh = github, handlers = {}) {
     return locked(root, (cwd, loc) => {
         const { run, config, model: project } = current(cwd, loc);
         requireValue(approve && run.status === 'active' && !run.paused, 'dispatch requires an active run and --approve');
@@ -256,11 +271,17 @@ function dispatch(root, storyId, approve, gh = github) {
             requireValue(attempt <= config.max_attempts, `Attempt budget exhausted for ${story.id}`);
             const feature = project.features.get(story.feature_id);
             const job = { id: story.id, feature_id: story.feature_id, scope: config.ownership[story.id], attempt, status: 'creating' };
+            if (run.mode === 'hybrid') job.backend = config.routes[story.id];
             run.jobs[story.id] = job;
             save(loc, run);
             try {
-                const output = gh(cwd, ['agent-task', 'create', '--repo', config.repository, '--base', config.base_branch, '--from-file', '-'], prompt(run, feature, story, job.scope));
-                Object.assign(job, created(output, config.repository));
+                if (job.backend && job.backend !== 'cloud') {
+                    requireValue(typeof handlers[job.backend] === 'function', 'Use the hybrid runtime for local or verification dispatch');
+                    Object.assign(job, handlers[job.backend](cwd, run, config, story, job));
+                } else {
+                    const output = gh(cwd, ['agent-task', 'create', '--repo', config.repository, '--base', config.base_branch, '--from-file', '-'], prompt(run, feature, story, job.scope));
+                    Object.assign(job, created(output, config.repository));
+                }
                 save(loc, run);
                 started.push({ story_id: story.id, status: job.status, pr: job.pr || null, session_id: job.session_id || null, job_id: job.job_id || null });
             } catch (error) {
@@ -371,7 +392,7 @@ function refresh(root, gh = github) {
         for (const job of Object.values(run.jobs)) {
             if (['merging', 'merge-uncertain'].includes(job.status)) {
                 result.push(mergeResult(cwd, loc, run, config, job, gh));
-            } else if (job.session_id && ['running', 'waiting', 'ready'].includes(job.status)) {
+            } else if (job.session_id && (!job.backend || job.backend === 'cloud') && ['running', 'waiting', 'ready'].includes(job.status)) {
                 session(cwd, config, job, gh);
                 save(loc, run);
                 result.push({ story_id: job.id, status: job.status, pr: job.pr || null });
@@ -420,16 +441,22 @@ function prepare(root, storyId, featureId, workspace, evaluatorId, approve, gh =
         let snapshot, criteria, id;
         if (storyId) {
             const job = run.jobs[storyId];
-            requireValue(job && job.session_id, 'Story has no cloud session');
-            session(cwd, config, job, gh);
+            requireValue(job && (job.session_id || ['local', 'verification'].includes(job.backend)), 'Story has no verified execution assignment');
+            requireValue(!run.builder_ids?.includes(evaluatorId), 'Evaluator must be independent of every local builder');
+            if (!job.backend || job.backend === 'cloud') session(cwd, config, job, gh);
             requireValue(job.status === 'ready', 'Cloud session is not ready for review');
-            snapshot = storySnapshot(cwd, config, job, workspace, gh);
+            if (job.backend === 'verification') {
+                requireValue(job.base_sha === run.base_sha, 'Verification baseline changed; abandon and rerun validation');
+                snapshot = { sha: run.base_sha, base_sha: run.base_sha, workspace: worktree(cwd, workspace, run.base_sha), kind: 'verification' };
+            } else {
+                snapshot = storySnapshot(cwd, config, job, workspace, gh);
+            }
             criteria = project.stories.get(storyId).acceptance_criteria;
             id = job.feature_id;
         } else {
             requireValue(config.feature_ids.includes(featureId), 'Feature is not approved');
             const feature = project.features.get(featureId);
-            const integrated = new Set(Object.values(run.jobs).filter(job => job.status === 'merged').map(job => job.id));
+            const integrated = new Set(Object.values(run.jobs).filter(job => ['merged', 'verified'].includes(job.status)).map(job => job.id));
             requireValue(feature.stories.every(id => project.stories.get(id).status === 'done' || integrated.has(id)), 'Merge all feature stories before final review');
             requireValue(project.graph.get(featureId).every(id => model.isSatisfied(project, id, integrated)), 'Feature prerequisites must be complete before final review');
             const sha = baseSha(cwd, config, gh);
@@ -461,10 +488,14 @@ function verifyCandidate(root, run, config, candidate, gh) {
     worktree(root, candidate.workspace, candidate.sha);
     if (candidate.story_id) {
         const job = run.jobs[candidate.story_id];
-        session(root, config, job, gh);
+        if (!job.backend || job.backend === 'cloud') session(root, config, job, gh);
         requireValue(job.status === 'ready', 'Cloud session is no longer ready');
-        const snapshot = storySnapshot(root, config, job, candidate.workspace, gh);
-        requireValue(snapshot.sha === candidate.sha && snapshot.base_sha === candidate.base_sha, 'Reviewed PR head or base changed');
+        if (candidate.kind === 'verification') {
+            requireValue(job.base_sha === candidate.sha && candidate.sha === run.base_sha, 'Verification baseline changed');
+        } else {
+            const snapshot = storySnapshot(root, config, job, candidate.workspace, gh);
+            requireValue(snapshot.sha === candidate.sha && snapshot.base_sha === candidate.base_sha, 'Reviewed PR head or base changed');
+        }
     } else {
         requireValue(baseSha(root, config, gh) === candidate.sha, 'Reviewed feature base changed');
     }
@@ -490,6 +521,7 @@ function merge(root, approve, gh = github) {
         const { run, config } = current(cwd, loc);
         const candidate = run.candidate;
         requireValue(approve && !run.paused && candidate?.story_id && candidate.phase === 'review' && candidate.review?.verdict === 'PASS', 'An unpaused run, passing story review, and --approve are required');
+        requireValue(candidate.kind !== 'verification', 'Verification-only evidence is accepted without a fabricated PR merge');
         budget(run, config);
         clean(cwd);
         verifyCandidate(cwd, run, config, candidate, gh);
@@ -598,11 +630,12 @@ function control(root, action, storyId, approve, gh = github) {
             delete job.error;
         } else if (action === 'abandon') {
             const job = run.jobs[storyId];
-            requireValue(!run.candidate && job && ['creating', 'uncertain', 'awaiting-reference', 'blocked', 'ready'].includes(job.status), 'Story does not need reconciliation or a review remains active');
+            requireValue(!run.candidate && job && ['creating', 'uncertain', 'awaiting-reference', 'blocked', 'ready', 'built', 'local-ready', 'publish-uncertain', 'update-uncertain'].includes(job.status), 'Story does not need reconciliation or a review remains active');
+            if (job.backend === 'local' && job.pid) requireValue(!require('../../../hybrid/local.cjs').processAlive(job.pid), 'Stop the specific local worker before abandoning');
             if (job.pr) requireValue(pull(cwd, config, job.pr, gh).state === 'CLOSED', 'Close the unmerged PR before abandoning');
             job.status = 'abandoned';
         } else if (action === 'cancel') {
-            requireValue(!run.candidate && Object.values(run.jobs).every(job => ['merged', 'abandoned', 'merged-unverified'].includes(job.status)), 'Reconcile all remote work before cancelling');
+            requireValue(!run.candidate && Object.values(run.jobs).every(job => ['merged', 'verified', 'abandoned', 'merged-unverified'].includes(job.status)), 'Reconcile all remote work before cancelling');
             run.status = 'cancelled';
             save(loc, run);
             fs.unlinkSync(loc.active);
@@ -669,6 +702,8 @@ function main(argv) {
         requireValue(options[key] !== undefined, 'Missing argument value');
     }
     const root = path.resolve(options.root || process.cwd());
+    const loc = locations(repository(root));
+    if (!absent(loc.active)) requireValue(active(loc).mode !== 'hybrid', 'Use hybrid/runtime.cjs for the active Jira hybrid run');
     const operations = {
         plan: () => plan(root, options.config),
         begin: () => begin(root, options.config, options.approve),
@@ -688,7 +723,8 @@ function main(argv) {
         resume: () => control(root, 'resume', null, options.approve),
         abandon: () => control(root, 'abandon', options.story, options.approve),
         cancel: () => control(root, 'cancel', null, options.approve),
-        'recover-lock': () => recoverLock(root, options.approve)
+        'recover-lock': () => recoverLock(root, options.approve),
+        'recover-start': () => shared.recoverStartGuard(root, options.approve)
     };
     requireValue(Object.hasOwn(operations, command), 'Unknown cloud parallel command');
     return operations[command]();
@@ -699,4 +735,8 @@ if (require.main === module) {
     catch (error) { process.stderr.write(`Harness cloud parallel: ${error.message}\n`); process.exitCode = 1; }
 }
 
-module.exports = { begin, dispatch, refresh, attach, prepare, review, merge, acceptFinal, publish, control, status, plan, locations, parseConfig, created, main };
+module.exports = {
+    begin, dispatch, refresh, attach, prepare, review, merge, acceptFinal, publish, control, status, plan,
+    locations, parseConfig, created, main, github, locked, current, save, active, budget, baseSha, ready,
+    prompt, pull, verifyCandidate, load, worktree, recoverLock
+};

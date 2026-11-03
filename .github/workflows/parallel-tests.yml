@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - "parallel/**"
+      - "hybrid/**"
+      - "jira/**"
       - "agents/**"
       - "skills/**"
       - "hooks/**"
@@ -12,10 +14,14 @@ on:
       - "cloud/**"
       - "tests/parallel.test.cjs"
       - "tests/cloud-parallel.test.cjs"
+      - "tests/hybrid*.test.cjs"
+      - "tests/jira.test.cjs"
       - ".github/workflows/parallel-tests.yml"
   push:
     paths:
       - "parallel/**"
+      - "hybrid/**"
+      - "jira/**"
       - "agents/**"
       - "skills/**"
       - "hooks/**"
@@ -24,6 +30,8 @@ on:
       - "cloud/**"
       - "tests/parallel.test.cjs"
       - "tests/cloud-parallel.test.cjs"
+      - "tests/hybrid*.test.cjs"
+      - "tests/jira.test.cjs"
       - ".github/workflows/parallel-tests.yml"
 
 permissions:
@@ -61,3 +69,20 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: node --test tests/cloud-parallel.test.cjs
+
+  manual-jira-hybrid:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ["22.20.0", "24.x"]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --test tests/jira.test.cjs tests/hybrid-local.test.cjs tests/hybrid.test.cjs

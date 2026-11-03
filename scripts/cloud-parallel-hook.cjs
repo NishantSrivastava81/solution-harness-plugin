@@ -2,24 +2,26 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { git, repository } = require('../parallel/runtime.cjs');
+const { git } = require('../parallel/runtime.cjs');
 const { readJson, noLinks, requireValue } = require('../parallel/model.cjs');
 const { locations } = require('../skills/cloud-parallel/scripts/coordinator.cjs');
 
-function context(cwd) {
+function context(cwd, includeDormant = false) {
     const probe = git(cwd, ['rev-parse', '--show-toplevel'], true);
     if (probe.status !== 0) return null;
-    const root = repository(probe.stdout.trim());
+    const root = fs.realpathSync(probe.stdout.trim());
     const loc = locations(root);
-    if (!fs.existsSync(loc.active)) return null;
+    const dormant = { root, loc, run: null, role: null };
+    if (!fs.existsSync(loc.active)) return includeDormant ? dormant : null;
     const reference = readJson(loc.active);
     requireValue(typeof reference.id === 'string' && /^[a-f0-9-]{36}$/i.test(reference.id), 'Invalid cloud run reference');
     const run = readJson(path.join(loc.directory, 'runs', `${reference.id}.json`));
     requireValue(run.version === 1 && run.id === reference.id, 'Invalid cloud run state');
     const same = (first, second) => fs.realpathSync(first).toLowerCase() === fs.realpathSync(second).toLowerCase();
+    if (run.mode === 'hybrid') return { root, loc, run, role: null };
     if (same(root, run.root)) return { root, loc, run, role: 'coordinator' };
     if (run.candidate?.workspace && same(root, run.candidate.workspace)) return { root, loc, run, role: 'evaluator' };
-    return null;
+    return includeDormant ? dormant : null;
 }
 
 function deny(event, reason) {
@@ -31,8 +33,12 @@ function deny(event, reason) {
 }
 
 function handle(cwd, event, payload = {}) {
-    const value = context(cwd);
-    if (!value) return null;
+    const value = context(cwd, true);
+    if (value && (!value.run || value.run.mode === 'hybrid')) {
+        const hybrid = require('../hybrid/hooks.cjs').handle(cwd, event, payload, value);
+        if (hybrid !== null) return hybrid;
+    }
+    if (!value?.run || !value.role) return null;
     const { loc, run, role } = value;
     if (event === 'SessionStart') {
         const detail = role === 'coordinator'

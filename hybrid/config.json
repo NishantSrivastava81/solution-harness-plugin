@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "execution_mode": "hybrid-stories",
+  "repository": "OWNER/REPO",
+  "base_branch": "main",
+  "jira": {
+    "url": "https://YOUR-SITE.atlassian.net",
+    "board_id": 1,
+    "auth": "basic",
+    "token_env": "JIRA_API_TOKEN",
+    "email_env": "JIRA_EMAIL"
+  },
+  "feature_ids": [],
+  "story_ids": [],
+  "routes": {},
+  "approved_designs": [],
+  "approved_verification": [],
+  "instructions_reviewed": false,
+  "workspace_isolation_confirmed": false,
+  "cloud_context_approved": false,
+  "branch_protection_confirmed": false,
+  "allow_future": false,
+  "eligible_statuses": ["To Do"],
+  "max_workers": 3,
+  "max_minutes": 120,
+  "max_attempts": 2,
+  "lease_minutes": 30,
+  "require_ci": true,
+  "merge_method": "squash",
+  "verification": [],
+  "ownership": {},
+  "local": {
+    "mode": "manual-workspace",
+    "command": "copilot",
+    "args": ["--prompt", "{prompt}"],
+    "timeout_seconds": 1200,
+    "permissions_reviewed": false
+  },
+  "jira_writeback": {
+    "enabled": false,
+    "transition_id": null,
+    "target_status_id": null
+  }
+}

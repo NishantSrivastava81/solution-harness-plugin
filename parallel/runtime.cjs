@@ -78,6 +78,40 @@ function coordinator(root, operation) {
     }
 }
 
+function startGuard(root, operation) {
+    const directory = path.join(locations(repository(root)).common, 'solution-harness');
+    noLinks(directory);
+    fs.mkdirSync(directory, { recursive: true });
+    const lock = path.join(directory, 'start.lock');
+    try { fs.mkdirSync(lock); }
+    catch (error) {
+        if (error.code === 'EEXIST') throw new Error('Another execution mode is starting; retry after it finishes');
+        throw error;
+    }
+    const owner = path.join(lock, 'owner.json');
+    try {
+        atomicJson(owner, { pid: process.pid });
+        return operation();
+    } finally {
+        if (!absent(owner)) fs.unlinkSync(owner);
+        fs.rmdirSync(lock);
+    }
+}
+
+function recoverStartGuard(root, approve) {
+    const lock = path.join(locations(repository(root)).common, 'solution-harness', 'start.lock');
+    requireValue(approve && !absent(lock), 'No abandoned execution-start lock to recover');
+    const owner = path.join(lock, 'owner.json'), value = readJson(owner);
+    requireValue(Number.isInteger(value.pid) && value.pid > 0, 'Invalid execution-start owner');
+    let alive = true;
+    try { process.kill(value.pid, 0); }
+    catch (error) { if (error.code === 'ESRCH') alive = false; else throw error; }
+    requireValue(!alive, 'Execution-start owner is still alive; do not steal its lock');
+    fs.unlinkSync(owner);
+    fs.rmdirSync(lock);
+    return { recovered: true };
+}
+
 function readRun(root, id) {
     const loc = locations(root);
     id = id || readJson(loc.active).run_id;
@@ -205,7 +239,7 @@ function writeAssignment(run, worktree, role, id, agentId, attempt) {
 }
 
 function begin(root, featureId, approve = false) {
-    return coordinator(root, (cwd, loc) => {
+    return startGuard(root, () => coordinator(root, (cwd, loc) => {
         requireValue(approve, 'begin requires --approve');
         requireValue(absent(loc.active), 'A run already exists; resume, finish, or cancel it first');
         requireValue(absent(path.join(loc.common, 'solution-harness', 'cloud-parallel', 'active.json')), 'A cloud parallel run is active; pause and finish it before starting local parallel work');
@@ -246,7 +280,7 @@ function begin(root, featureId, approve = false) {
             throw error;
         }
         return status(cwd);
-    });
+    }));
 }
 
 function jobReady(run, config, model, storyId) {
@@ -768,6 +802,7 @@ function main(argv) {
         cancel: () => checkpoint(root, 'cancel', options.approve),
         cleanup: () => cleanup(root, options.run, options.approve),
         'recover-lock': () => recoverLock(root, options.approve),
+        'recover-start': () => recoverStartGuard(root, options.approve),
         status: () => status(root, options.run)
     };
     requireValue(Object.hasOwn(operations, command), 'Unknown command; use plan, begin, claim, context, capture, prepare-review, accept, prepare-final, status, pause, resume, recover, cancel, or cleanup');
@@ -783,5 +818,5 @@ module.exports = {
     begin, claim, context, assigned, workerReport, workerBlock, capture, prepareReview, reviewReport, accept,
     recover, abortCandidate, release, heartbeat, checkpoint, recoverLock, cleanup, status,
     locations, readRun, readAssignment, assignmentPath, git, fingerprint, replaceStatuses, noLinks, validateReview,
-    repository, atomicJson, absent, clean, checks, main
+    repository, atomicJson, absent, clean, checks, main, startGuard, recoverStartGuard, changed, scopeCheck, commitMessage
 };

@@ -64,3 +64,50 @@ the requested harness change without creating or changing application features.
   hosted task. The local default PATH still resolves Node.js 12 and does not
   include GitHub CLI; users must provide supported versions on the agent PATH.
   Hosted agent behavior and the new Windows/Linux CI matrix remain unverified.
+
+## 2026-11-03 - Manual Jira hybrid execution
+
+* Added version 1.3.0 with `/jira-plan`, `/hybrid-loop`, and `/jira-sync`.
+  Execution is manually triggered; no sprint watcher, webhook listener, or
+  automatic Jira sprint start was added.
+* Added authorized Jira Cloud reads with current pagination, ADF normalization,
+  stable Source IDs, criterion/dependency reconciliation, and explicit active or
+  approved future-sprint selection. Existing repository definitions remain
+  authoritative for readiness and retained external prerequisites.
+* Extended the existing cloud coordinator's ledger into one opt-in hybrid
+  authority. Added a story allowlist, global backend/resource ownership, shared
+  start exclusion, isolated local workspaces and attached CLI processes, fenced
+  reports, absolute budgets/leases, local PR publication, and independent
+  exact-head/current-base evaluation.
+* Added no-code verification evidence, selected-story delivery review,
+  partial-feature-safe metadata publication, interrupted-publication recovery,
+  guarded base updates, and separately approved idempotent Jira evidence and
+  workflow transitions. Required repository approvals remain in force.
+* Wired assigned agent protocols, argument-free hook receipts, operator
+  documentation, version metadata, and Windows/Linux CI. The hosted
+  single-feature bundle still contains 18 skills and excludes the new local
+  workflows. The cloud installer remains optional for fresh GH CLI-driven
+  targets and available for standalone hosted users.
+* Added root ignore rules for local credentials, dependencies, validation
+  output, temporary executor fixtures, and generated trajectory logs while
+  preserving environment templates and project configuration.
+* Validated all 68 distinct new/updated cases on Node.js 24.21.0: 33 Jira
+  adapter, 26 local executor, and nine hybrid integration cases. The combined
+  run passed 67; its unrelated-process fixture expired naturally under load.
+  Extending that fixture's bounded lifetime made the focused timeout-isolation
+  rerun pass without changing production shutdown behavior.
+* All 36 existing local-parallel and 22 existing cloud-parallel cases passed.
+  All 18 applicable hosted-cloud cases passed. The existing Windows symlink
+  case reproduced its documented EPERM at fixture creation and was explicitly
+  excluded from the hosted compatibility rerun; its source and Linux coverage
+  are unchanged. Syntax/imports, JSON/version alignment, packaging, secret-free
+  configuration, and the absence of watcher APIs were also checked.
+* No live Jira data, application files, cloud jobs, production resources, or
+  remote Git history were changed. Actual Copilot CLI isolation, hosted-agent
+  behavior, Jira workflow permissions, account entitlements, and the remote CI
+  matrix still require an approved pilot. The default terminal Node remains
+  version 12, and no Copilot executable was found on PATH; provision supported
+  tools and credentials before use.
+
+The plugin has no feature catalog to update. Application Source IDs and plans
+were not generated or modified by this implementation.

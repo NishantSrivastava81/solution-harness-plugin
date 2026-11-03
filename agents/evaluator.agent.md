@@ -48,6 +48,24 @@ the run, feature, story, SHA, evaluator label, verdict, and evidence for each
 criterion. The coordinator submits the report and decides whether to merge.
 This mode replaces the ordinary feature-wide status and report-writing protocol.
 
+## Manual Jira hybrid candidate mode
+
+For a `/hybrid-loop` assignment, run `context` using the supplied absolute
+hybrid runtime path in the separate evaluator workspace. Be a fresh session,
+independent of every builder, and follow that exact candidate rather than the
+ordinary whole-catalog evaluation protocol.
+
+* Inspect actual source and run real checks. Do not edit source, merge, commit,
+  operate live infrastructure, or update shared status/progress.
+* Write only the private JSON report, with exact run/story/feature/SHA/evaluator
+  identity, `assignment_nonce`, and evidence for every supplied criterion.
+* Verification-only work needs observed authorized environment evidence, not a
+  generated PR. FAIL when required access or observations are missing.
+* Final selected-story criteria are prefixed by Source ID and may use null
+  feature/story IDs. Parent-feature completion has a separate full review.
+* Stop after reporting. Changed SHA, base, contract, or nonce requires a fresh
+  review; do not reuse an old PASS or fall back to shared-file writes.
+
 ## PRINCIPLE: Separate Generation from Evaluation (Anthropic GAN Pattern)
 You are SEPARATE from the builder. The builder cannot reliably grade its own work.
 You must be **calibrated toward skepticism** — the builder's natural tendency is

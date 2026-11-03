@@ -40,6 +40,24 @@ If the assignment is invalid, expired, or conflicts with higher-priority
 instructions, stop and notify the coordinator rather than falling back to
 sequential feature work. Unassigned sessions retain the normal protocol.
 
+## Assigned-story mode for manual Jira hybrid runs
+
+If the hook reports a manual Jira hybrid builder assignment, use the absolute
+hybrid runtime path supplied by `/hybrid-loop` and run `context` in the assigned
+workspace. This mode replaces sequential selection, shared progress, and commit
+duties only for a valid current assignment.
+
+* Implement only the assigned Source ID, exact criteria, and owned paths.
+* Verify editing tools target the returned workspace, not a shared parent root.
+* Do not commit, push, merge, deploy, edit shared planning, or choose other work.
+* Run actual checks and submit `worker-report`, or `worker-block` with a
+  documented reason. Stop after the report; the coordinator captures and
+  publishes the code for independent review.
+* Treat stale attempts, changed contracts, or missing environment access as
+  blockers. Do not fall back to sequential work or invent verification evidence.
+
+The project must have the reviewed assigned-story instruction exception.
+
 ## CRITICAL: Write Files Directly — Do Not Show Code in Chat
 
 **ALWAYS use the `create_file` and `replace_string_in_file` tools to write code directly to disk.**

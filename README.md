@@ -10,7 +10,7 @@ A single-install plugin that provides everything you need to build, refactor, an
 | Component | Count | Contents |
 |-----------|-------|----------|
 | **Agents** | 8 | ideator, planner, architect, builder, evaluator, reviewer, janitor, orchestrator |
-| **Skills** | 20 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check, /loop, /plan-execution, /parallel-loop, /cloud-parallel |
+| **Skills** | 23 | /init-solution, /onboard, /add-features, /design-feature, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check, /loop, /plan-execution, /parallel-loop, /cloud-parallel, /jira-plan, /hybrid-loop, /jira-sync |
 | **Hooks** | 4 | SessionStart (inject status), Stop (enforce progress log), PreToolUse (block dangerous commands), PostToolUse (trajectory logging) |
 
 ## Install
@@ -163,6 +163,34 @@ Git, approved story scopes, real verification commands, and repository review
 protections. See the [cloud parallel skill](skills/cloud-parallel/SKILL.md) for
 configuration, guarded merge, and recovery. Run the coordinator tests with
 `node --test tests\cloud-parallel.test.cjs`.
+
+### Manual Jira Hybrid Execution
+
+Version 1.3 adds an opt-in manually triggered Jira Cloud workflow. Run
+`/jira-plan` to read the selected sprint and reconcile Source IDs, criteria,
+dependencies, designs, and ownership with the full repository backlog. Approve
+the snapshot and story allowlist, then use `/hybrid-loop` for mixed cloud/local
+developers, independent local evaluation, and serial protected integration.
+There is no sprint watcher or automatic Jira sprint start.
+
+Local workers use separate verified workspaces or attached, bounded Copilot CLI
+processes with reviewed scoped permissions. Verification-only work uses
+baseline-bound evidence rather than a fabricated PR. Full parent-feature
+completion remains separate from sprint-subset delivery.
+
+`/jira-sync` optionally publishes accepted evidence and explicitly mapped
+workflow transitions; it is separately approved and disabled by default.
+Browser login does not authorize API clients. Configure credentials through
+environment references, never in source, prompts, or receipts.
+
+See the [manual Jira hybrid guide](hybrid/README.md) and
+[configuration template](hybrid/config.json). Existing standalone execution
+modes remain unchanged, and the hosted single-feature bundle excludes all three
+new local coordinator skills.
+
+```powershell
+node --test tests\jira.test.cjs tests\hybrid-local.test.cjs tests\hybrid.test.cjs
+```
 
 ## Plugin Structure
 
