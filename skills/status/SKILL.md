@@ -5,12 +5,12 @@ description: "Show a dashboard of project status — features complete, in-progr
 
 # Solution Status Dashboard
 
-If a local parallel run is active, also run
-`node .github/harness/parallel/runtime.cjs status` from the coordinator root.
-Show its feature, ready stories, worker attempts/leases, candidate phase, budget,
-and stale-input warning. Runtime state lives in the Git common directory, not
-the source backlog. A built/reviewing story is not done. Do not modify state to
-repair the display; report corrupt/missing active-run data explicitly.
+If a guided run is active, read its approved run record and reconcile it with
+the actual workspaces and, for cloud tasks, `gh agent-task list` and
+`gh agent-task view`. Show assigned stories, task/PR identities, review state,
+budgets, and any missing or stale evidence. A built or reviewing story is not
+done. Do not invent state or modify records to repair the display; report
+missing information explicitly.
 
 Read `docs/FEATURES.json` and `docs/PROGRESS.md` and display:
 

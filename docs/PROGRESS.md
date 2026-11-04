@@ -171,3 +171,22 @@ were not generated or modified by this implementation.
   configuration, or remote Git history were changed. Fresh VS Code sessions,
   real agent behavior, sandbox grants, and remote CI still need operator smoke
   checks; schema/discovery tests are not proof of those behaviors.
+
+## 2026-11-04 - Native guided plugin workflows
+
+* Migrated version 2.0.0 to native plugin agents and skills, removed the legacy
+  CommonJS runtimes, installers, and bundled hooks, and moved `cloud-loop` into
+  the discoverable skills directory.
+* Retained local parallel, GitHub cloud, and Jira hybrid workflows as explicitly
+  approved manual guidance. Documented the loss of automatic scheduling,
+  enforcement, session context, trajectory logs, and stop gates.
+* Replaced obsolete runtime tests with packaging, guidance, report-shape, and
+  GitHub CLI capability checks. Updated the repository CI workflows and noted
+  that required status-check rules may need review.
+* Passed eight packaging and nine workflow checks locally, verified GitHub CLI
+  command options and JSON fields, and exercised the documented Git worktree
+  commands in a disposable local repository. The local Node.js 12 emitted its
+  expected experimental ES module warning.
+* No cloud tasks, Jira writes, application repositories, remote history, or
+  global plugin settings were changed. Actual host discovery, cloud and Jira
+  behavior, and the updated remote CI matrix still require an approved check.

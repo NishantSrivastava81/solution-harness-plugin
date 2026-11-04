@@ -54,6 +54,9 @@ For materially different flows, compare two concise options or ASCII wireframes
 and obtain approval for the consequential choice before building. For a small,
 well-specified change, keep the brief proportional.
 
+For B2B SaaS work, consider in-scope onboarding, workspace roles, and plan or
+usage states. UI restrictions do not replace server-side authorization.
+
 ## 2. Choose a coherent visual direction
 
 Preserve an established product's visual language unless redesign is explicitly

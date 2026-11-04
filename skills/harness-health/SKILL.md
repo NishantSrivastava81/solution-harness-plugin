@@ -17,10 +17,11 @@ List every harness component and assess if it's still needed:
 | Evaluator agent | Yes/Maybe/No | [Why] |
 | Reviewer agent | Yes/Maybe/No | [Why] |
 | Janitor agent | Yes/Maybe/No | [Why] |
-| SessionStart hook | Yes/Maybe/No | [Why] |
-| Stop hook | Yes/Maybe/No | [Why] |
-| PreToolUse hook | Yes/Maybe/No | [Why] |
-| PostToolUse hook | Yes/Maybe/No | [Why] |
+| Guided execution skills | Yes/Maybe/No | [Why] |
+| Host permissions and repository protections | Yes/Maybe/No | [Why] |
+
+This plugin does not bundle enforcement hooks. Assess any separately configured
+workspace or organization hooks independently; do not assume they are active.
 
 ## 2. Evaluator Accuracy
 Review docs/EVALUATION.md if it exists. Were findings legitimate or false positives?

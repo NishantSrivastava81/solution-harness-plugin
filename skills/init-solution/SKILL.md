@@ -57,12 +57,12 @@ Create `AGENTS.md` at the project root — a short table of contents (not an enc
 
 ## Optional Local Parallel Assignments
 - Sequential mode remains the default; parallel stories still share one feature.
-- With a valid local runtime assignment only, builders implement their assigned
+- With an explicit approved story assignment only, builders implement their assigned
   story in a separate worktree and report instead of committing or logging shared progress.
 - Evaluators review the exact assigned candidate and write only their private report.
 - The coordinator alone commits, integrates, and publishes feature/backlog status
   and progress after independent full-feature review.
-- Workers must not edit shared planning, instructions, or runtime configuration.
+- Workers must not edit shared planning or instructions.
 
 ## Project Structure
 docs/          — Plan, features, progress, architecture
@@ -93,11 +93,11 @@ Create `.github/copilot-instructions.md` with project-wide coding standards:
 - End: Commit code, update docs/PROGRESS.md
 
 ## Assigned-Story Exception
-- Only for a valid local parallel runtime assignment, replace feature selection
+- Only for an explicit approved story assignment, replace feature selection
   with the assigned story and replace worker commits/progress with private reports.
 - Builders and evaluators use separate verified workspaces and never merge,
   deploy, choose other features, or write shared status/configuration/instructions.
-- The coordinator alone captures commits, serializes integration, and publishes
+- The coordinator alone coordinates commits, serializes integration, and publishes
   status and progress after independent full-feature acceptance.
 - Unassigned sessions retain the sequential lifecycle below.
 

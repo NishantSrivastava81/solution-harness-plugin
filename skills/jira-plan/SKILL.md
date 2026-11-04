@@ -1,74 +1,44 @@
 ---
 name: jira-plan
-description: "Preview user stories from a Jira sprint, reconcile Source IDs and repository readiness, and plan manual hybrid cloud/local execution. Never launches workers or changes Jira."
+description: "Read a selected Jira sprint or approved export, reconcile Source IDs and dependencies, and propose a manual hybrid execution plan."
 disable-model-invocation: true
 ---
 
 # Jira Plan
 
-Read the selected Jira Cloud sprint and reconcile it with the target project's
-existing feature catalog and backlog. Preserve original Source IDs, criteria,
-dependencies, and delivery evidence. This skill is local-only and manually
-invoked; there is no sprint watcher.
+Preview a selected Jira Cloud sprint without launching workers or changing
+Jira. Use an independently configured and authorized Jira MCP server or client,
+or a user-provided export. The plugin does not supply Jira access; `gh` is for
+GitHub, not Jira. See the [hybrid guide](../../hybrid/README.md).
 
-## Prerequisites
+## Read and reconcile
 
-* Use the updated full plugin and Node.js 22.20+ or 24+.
-* Onboard the target repository before planning. Read its catalog, backlog,
-  architecture, plan, progress, and referenced designs.
-* Configure the [hybrid template](../../hybrid/config.json) outside the target
-  checkout. Replace its repository, Jira site, board, tests, and ownership with
-  real values. Read the [operator guide](../../hybrid/README.md).
-* Supply authorized Jira credentials through the configured environment
-  references. Browser login alone does not authorize the REST client. Do not
-  extract cookies, create tokens without approval, or paste secrets into chat.
+1. Confirm the Jira site, board, selected sprint, access, and permitted data.
+   Use the organization's credential mechanism; never paste tokens into chat,
+   task briefs, or run records.
+2. Read all relevant pages of issues, stable issue and Source IDs, criteria,
+   dependencies, and update timestamps. Surface permission, pagination, and
+   rate-limit failures. If no active sprint exists, require an explicitly
+   selected and approved future sprint or report an error. Multiple candidates
+   require an explicit choice; do not start a future sprint.
+3. Read the repository's full feature catalog, backlog, plan, architecture,
+   progress, and designs. Reconcile each Jira issue with existing definitions,
+   including prerequisites outside the sprint. Report unmapped or changed
+   requirements; do not invent criteria or replace the source catalog.
+4. Use `/plan-execution` to propose ownership, shared resources, tests, local or
+   cloud routes, budgets, and ready batches. No issue status alone authorizes
+   implementation.
 
-## Quick start
+## Approval and drift
 
-Resolve the [runtime](../../hybrid/runtime.cjs) relative to the installed skill,
-not a hard-coded plugin-cache path. Run from the target coordinator checkout:
+Present the selected sprint and exact issue/story allowlist, normalized
+criteria, source timestamps, blockers, and permitted GitHub context. Obtain
+approval and record the result in an agreed safe location. Immediately before
+dispatch, re-read the source or obtain an updated export and compare it with
+the approved snapshot. Changed criteria, dependencies, or scope require
+reconciliation and renewed approval.
 
-```powershell
-$runtime = '<absolute plugin path>\hybrid\runtime.cjs'
-$config = '<absolute approved configuration path>'
-node $runtime plan --config $config
-```
-
-No active sprint is an explicit error. Multiple active sprints require a choice.
-Use `--sprint <id>` to select one. A planned sprint additionally requires the
-explicit `allow_future` configuration; selection never starts it in Jira.
-
-## Review the preview
-
-1. Show the sprint, snapshot digest, Source ID mappings, ready stories, initial
-   batches, and every blocker. Do not hide unmapped Jira issues.
-2. Retain outside-sprint and omitted-feature prerequisites. A historical
-   "complete at review" statement is not fresh repository evidence.
-3. Resolve changed criteria/dependency coverage with the planner. Do not
-   overwrite feature definitions or invent acceptance requirements.
-4. Approve an explicit `story_ids` allowlist, parent features/designs, backend
-   routes, ownership/resources, real checks, budgets, and environment gates.
-5. Obtain approval to share the necessary story context with GitHub before any
-   cloud dispatch. Keep raw comments, attachments, and credentials out of briefs.
-6. Rerun the preview after configuration changes. `/hybrid-loop` begins only
-   with the exact approved `snapshot_digest`.
-
-## Parameters
-
-| Parameter  | Default       | Meaning                                    |
-|------------|---------------|--------------------------------------------|
-| `--root`   | Current root  | Explicit target coordinator checkout       |
-| `--config` | Required      | External, credential-free configuration    |
-| `--sprint` | Active sprint | Explicit choice; future scope is opt-in    |
-
-## Troubleshooting
-
-Missing or conflicting Source IDs, absent criteria, changed parent coverage,
-unknown prerequisites, and unsupported Jira fields are blockers. Resolve them
-explicitly; do not bypass the existing model validator. HTTP, permission,
-pagination, and rate-limit failures are errors, not empty backlogs.
-
-The current adapter supports Jira Cloud, not Data Center. See the operator
-guide for authentication, field discovery, and rollout limitations.
-
-> Brought to you by solution-harness
+This comparison is manual: there is no automatic snapshot digest or drift guard.
+If the source cannot be rechecked or the integration is unavailable, report the
+blocker. Use `/hybrid-loop` only after approval; do not start a sprint or create
+tasks as part of this preview.

@@ -1,35 +1,39 @@
 ---
 title: Solution Harness Copilot Agent Plugin
-description: Agents, skills, hooks, and execution controls for incremental software delivery with GitHub Copilot.
+description: Native Copilot agents and skills for incremental delivery and guided GitHub and Jira workflows.
 ---
 
-A single-install plugin that provides everything you need to build, refactor, and maintain solutions with GitHub Copilot.
+# Solution Harness
 
-## What's Included
+Solution Harness packages specialized agents and reusable skills for planning,
+building, evaluating, reviewing, and maintaining software with GitHub Copilot.
+It uses the Agent Plugins 1.0 layout: portable skills live under `skills/`, and
+Copilot-specific agents live under `com.github.copilot/agents/`.
 
-| Component | Count | Contents |
-|-----------|-------|----------|
-| **Agents** | 8 | ideator, planner, architect, builder, evaluator, reviewer, janitor, orchestrator |
-| **Skills** | 24 | /init-solution, /onboard, /add-features, /design-feature, /frontend-design, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check, /loop, /plan-execution, /parallel-loop, /cloud-parallel, /jira-plan, /hybrid-loop, /jira-sync |
-| **Hooks** | 5 | sessionStart (inject status), agentStop (progress/assignment gates), subagentStop (assigned reports), preToolUse (command/ownership checks), postToolUse (argument-free receipts) |
+## What's included
+
+| Component | Contents |
+|-----------|----------|
+| 8 agents | ideator, planner, architect, builder, evaluator, reviewer, janitor, orchestrator |
+| Planning skills | `/init-solution`, `/onboard`, `/add-features`, `/design-feature`, `/refine-design`, `/refactor`, `/fix-issue`, `/sync-plan`, `/next-feature` |
+| Delivery and review skills | `/frontend-design`, `/evaluate`, `/pre-commit`, `/status`, `/log-progress`, `/harness-health`, `/testing`, `/architecture-check` |
+| Guided execution skills | `/loop`, `/plan-execution`, `/parallel-loop`, `/cloud-parallel`, `/cloud-loop`, `/jira-plan`, `/hybrid-loop`, `/jira-sync` |
+
+Version 2.0 removes the legacy runtime, installers, and bundled hooks. Parallel,
+cloud, and Jira workflows are now **guided, manual procedures**, not automated
+schedulers. The operator must verify approvals, assignments, ownership, budgets,
+reports, and integration. There are no bundled locks, leases, command guards,
+automatic session-status injection, trajectory logging, or stop gates.
+Copilot instructions are not a security boundary; use host permissions,
+repository protections, required reviews, and CI for controls.
 
 ## Install
 
-Version 1.5 uses the canonical **Agent Plugins 1.0** format for the shared
-Copilot runtime in VS Code and Copilot CLI. Select **Copilot** as the VS Code
-Session Target. Skills stay under `skills/`; agents and hooks use the
-`com.github.copilot/` namespace. The package no longer depends on Local-only
-tool names or handoff buttons.
+### VS Code
 
-Use a supported Node.js 22.20+ or 24+ on the PATH inherited by the agent host,
-hooks, and CLI processes. Terminal changes alone do not update an already
-running host's environment.
+Select **Copilot** as the session target. Run **Chat: Install Plugin From
+Source** and provide the repository URL, or add a local checkout to settings:
 
-### Option A: From Git URL
-In VS Code, run `Chat: Install Plugin From Source` from the Command Palette and enter the repo URL.
-
-### Option B: Local
-Clone this repo, then add to your VS Code settings:
 ```json
 {
   "chat.pluginLocations": {
@@ -38,11 +42,34 @@ Clone this repo, then add to your VS Code settings:
 }
 ```
 
-### Option C: GitHub Copilot Cloud Agent (Pilot)
+Reload or update the plugin and start a fresh session. Verify that the expected
+agents and skills are enabled in the selected host; availability can vary by
+host and policy.
 
-To enable the published plugin's skills and profiles natively, add the following
-to the **application repository's** `.github/copilot/settings.json`, preserving
-other settings:
+### Copilot CLI
+
+With Copilot CLI installed, either install a local checkout:
+
+```powershell
+copilot plugin install 'C:\path\to\solution-harness-plugin'
+copilot plugin list --json
+```
+
+Or install the published marketplace:
+
+```powershell
+copilot plugin marketplace add NishantSrivastava81/solution-harness-plugin
+copilot plugin install solution-harness@solution-harness-marketplace
+```
+
+The marketplace is declared at `.github/plugin/marketplace.json`. The
+published marketplace must contain this version before the remote install can
+pick it up. `copilot` and `gh` are separate CLIs.
+
+### GitHub Copilot cloud agent
+
+Enable the published plugin in the **application repository's**
+`.github/copilot/settings.json`, preserving any existing settings:
 
 ```json
 {
@@ -60,365 +87,114 @@ other settings:
 }
 ```
 
-Publish and verify the migrated marketplace before using these defaults.
-Enabling a plugin does not launch work, install project dependencies, approve
-designs, or create the standalone cloud-loop runtime. Local Jira/parallel
-coordinators remain local-only. Confirm cloud component availability in the
-actual job; local plugin installation is not automatically copied there.
+Commit the settings on the target repository's default branch, confirm that the
+marketplace is accessible, and verify component availability in the actual
+cloud session. Installing locally does not install the plugin in a cloud job.
+Configure the target project's own dependency setup and tests separately.
+See the [cloud guide](cloud/README.md).
 
-The installer below is an **optional standalone cloud-loop distribution**, not
-the only way to give a GH CLI-dispatched task plugin context. Use it when you
-want its dedicated hosted profiles, run state, hooks, and verification setup.
+## Workflows
 
-Install the cloud distribution into a target Git repository with Node.js 22+:
+### Start or onboard a project
 
-```sh
-node scripts/install-cloud.cjs --dry-run /path/to/your-project
-node scripts/install-cloud.cjs /path/to/your-project
-```
+For a new project, use `/init-solution` with the planner and optionally use the
+ideator and architect first. For an existing codebase, use `/onboard`. Both
+establish project-specific plans, feature state, progress, and instructions.
+Use `/next-feature`, `/design-feature`, the builder, and `/evaluate` for
+incremental delivery. `/frontend-design` supplies UI and accessibility guidance.
 
-This adds native `.github/agents`, `.github/skills`, `.github/hooks`, and a
-Copilot setup workflow. Existing project instructions are untouched; existing
-setup/config files are preserved, and other differing destinations stop the
-installation before writing. The local plugin is unchanged.
+### SaaS-aware guidance
 
-Before delegating, approve feature IDs and real test commands in the installed
-`.github/harness/config.json`, add project dependency setup, and merge the
-customizations into the target's default branch. Then select **orchestrator**
-in GitHub's Agents UI or issue assignment dialog:
+Existing skills consider tenant isolation, observability, usage, and B2B UX
+where relevant. They guide, but do not enforce, project controls.
 
-> Implement F001 only using cloud-loop. Obtain an independent evaluator verdict,
-> run all configured checks, and open a draft pull request. Stop on a blocker.
+### Sequential loop
 
-The pilot supplies three cloud profiles (orchestrator, builder, evaluator), the
-18 shared skills, including frontend-design, and a dedicated cloud-loop skill. It runs one approved
-feature per session with bounded rework, real test gates, and durable reports.
-It is not a multi-feature scheduler, and local tests do not prove hosted-agent
-behavior. See [the cloud setup and acceptance guide](cloud/README.md) for details.
+Run `/loop` in the orchestrator for a goal-bounded, one-feature-at-a-time
+workflow. Agree on scope, verification, autonomy, and budgets first. The builder
+and evaluator must be separate, and a passing verdict and real tests are
+required before completion. The default autonomy level pauses for approval.
 
-Run the dependency-free installer/runtime tests with:
+### Guided parallel and cloud work
 
-```sh
-node --test tests/cloud.test.cjs
-```
+Use `/plan-execution` to review dependencies and ownership, then explicitly
+choose `/parallel-loop` for local worktrees or `/cloud-parallel` for GitHub
+cloud tasks. One coordinator records assignments, checks exact candidates with
+an independent evaluator, and integrates accepted changes serially. See the
+[local guide](parallel/README.md).
 
-
-
-## Usage
-
-### CLI installation and migration
-
-Install a local development checkout with:
+For GitHub cloud work, `gh agent-task` is currently a preview feature. After
+approving the repository, base, and sanitized task brief, a typical operator
+flow is:
 
 ```powershell
-copilot plugin install 'D:\path\to\solution-harness-plugin'
-copilot plugin list --json
+gh agent-task create --repo OWNER/REPO --base main --from-file 'C:\work\approved-story.md'
+gh agent-task list
+gh agent-task view '<session-id>' --repo OWNER/REPO
+gh pr checks 123 --repo OWNER/REPO
 ```
 
-For the published marketplace:
+Replace the example values with the approved ones. Task creation sends the
+brief to GitHub; never include credentials or unapproved private context.
+Before any merge, follow `/cloud-parallel` for exact-head review, required
+checks, branch protection, and explicit approval. `/cloud-loop` describes a
+single-feature hosted task, not a multi-feature scheduler.
 
-```powershell
-copilot plugin marketplace add NishantSrivastava81/solution-harness-plugin
-copilot plugin install solution-harness@solution-harness-marketplace
-```
+### Jira hybrid work
 
-The catalog is published at `.github/plugin/marketplace.json`, with the stable
-marketplace name `solution-harness-marketplace`. Direct plugin installations
-and marketplace registrations are different operations.
+Use `/jira-plan` to preview a selected sprint, `/hybrid-loop` for an explicitly
+approved mix of local and GitHub cloud stories, and `/jira-sync` only for
+separately approved write-back. Jira requires an independently configured,
+authorized Jira MCP server, client, or user-provided export; `gh` does not
+provide Jira access. See the [Jira hybrid guide](hybrid/README.md).
 
-Before updating an active installation, pause and reconcile coordinator work,
-back up any customized project files, and start a fresh Copilot session after
-updating. Do not patch installation caches or enable old and migrated hooks
-together. Reinstall a path-sourced development copy when the client caches it.
-For VS Code, use **Chat: Update Plugins** or the Customizations editor and
-verify enabled components in the intended harness.
+## Upgrading from an earlier version
 
-Agent Plugins format migration is not merely adding `$schema`: component
-locations, tool/delegation semantics, and hook contracts changed together.
-The older VS Code Local harness's handoff buttons are intentionally replaced
-with explicit agent selection; model selection alone does not test migration.
+Pause active runs and reconcile outstanding worktrees, GitHub tasks, PRs, and
+Jira operations before updating. Preserve run evidence and back up customized
+project files. Review any previously installed Solution Harness hooks,
+instructions, and runtime commands in each application repository; disable
+only the obsolete entries with approval, without removing unrelated hooks or
+user data. Updating this plugin does not change installed copies in other
+repositories.
 
-### New Project
-1. Open an empty folder in VS Code
-2. **(Optional)** Switch to the **ideator** agent — brainstorm scope, research similar solutions, define MVP, produce docs/SPEC.md. Select **planner** and run `/init-solution` when ready.
-3. Switch to the **planner** agent → `/init-solution`
-4. **(Recommended)** Switch to the **architect** agent — research tech stack, design data model, define module boundaries, establish cross-cutting patterns. Produces a thorough docs/ARCHITECTURE.md.
-5. Switch to **builder** agent → `/next-feature` → `/design-feature` → build → `/evaluate`
+Update or reinstall the plugin through the host rather than editing its cache,
+then reload and start a new session. Version 2.0 does not resume a legacy
+coordinator automatically. Establish a new approved guided run record after
+reconciling the old one. The repository's CI job names and coverage have also
+changed; administrators should review any required status-check rules that
+refer to the old jobs.
 
-### Existing Project
-1. Open your project in VS Code
-2. Switch to the **planner** agent
-3. Type `/onboard` — analyzes your codebase, generates all harness state files
-4. Then:
-   - `/add-features` to plan new capabilities
-   - `/design-feature` to research patterns and create technical design before building
-   - `/refactor` to plan improvements
-   - `/fix-issue` to diagnose and fix bugs
-5. Switch to **builder** → `/next-feature` → build → `/evaluate`
+## Project state
 
-### Daily Workflow
-```
-/next-feature          → see what to build
-/design-feature        → research patterns, create technical design
-/refine-design         → provide feedback, iterate on the design
-[switch to builder]    → implement it
-/pre-commit            → validate before committing
-/log-progress          → record what was done
-/evaluate              → quality check
-/status                → dashboard view
-```
+`/init-solution` and `/onboard` may create `AGENTS.md`,
+`.github/copilot-instructions.md`, and project-specific documents such as
+`docs/PLAN.md`, `docs/FEATURES.json`, `docs/PROGRESS.md`, and
+`docs/ARCHITECTURE.md`. `/loop` adds its approved contract, budget, and run
+log. Operators explicitly maintain these files; the plugin no longer writes a
+trajectory log automatically.
 
-### Maintenance
-```
-[switch to janitor]    → detect drift, dead code, staleness
-/harness-health        → audit if harness components are still needed
-/architecture-check    → verify module boundaries
-```
+Feature IDs use `E` for existing features, `F` for new features, `R` for
+refactoring, and `B` for bug fixes.
 
-### Autonomous Loop
-Instead of driving each cycle by hand, let the **orchestrator** run the pipeline for you.
-It selects the next in-scope feature, dispatches a **builder** to make it and a separate
-**evaluator** to check it, and commits only on a green verdict — repeating until the goal
-is met or a stop condition fires.
-```
-[switch to orchestrator] → /loop
-```
-The loop is governed by three things it writes into your workspace:
-- **docs/LOOP.md** — the loop contract: verifiable goal, in-scope feature IDs, autonomy
-  level, verification gates, and escalation rules (the `/goal` primitive).
-- **docs/loop-budget.md** — per-run caps (iterations, commits, rework-per-feature,
-  wall-clock). When any cap is hit, the loop stops and reports — no runaway commits.
-- **docs/loop-run-log.md** — an append-only, per-iteration ledger of what was built,
-  the evaluator verdict, tests, and the commit.
+## Requirements and validation
 
-**Autonomy levels** (set in the contract): **L1** report-only (pause for approval after
-each iteration, the default) → **L2** assisted (auto-commit within scope) → **L3**
-unattended (narrow, highly-verifiable scopes only). The builder (maker) and evaluator
-(checker) are always separate subagents — the loop never grades its own work.
+- VS Code with GitHub Copilot or a compatible Copilot CLI host.
+- Git for worktree and repository operations.
+- An authenticated `gh` CLI, eligible Copilot access, and repository
+  permissions for cloud tasks and PR operations.
+- An authorized Jira integration or export only when using Jira workflows.
+- Node.js is **not** required to use the plugin. Contributors can run the
+  dependency-free packaging and guidance checks with Node.js:
 
-### Local Parallel Stories
+  ```powershell
+  node tests\plugin.test.mjs
+  node tests\workflows.test.mjs
+  ```
 
-Version 1.1.0 adds opt-in parallel stories within one approved feature. Run
-`/plan-execution` for dependency/resource-aware dry-run batches, then
-`/parallel-loop` for coordinator-controlled worktrees, independent exact-commit
-review, and serial integration. Sequential `/loop` remains the default.
+These checks do not prove hosted discovery, agent independence, Jira access,
+or repository policy. Verify those in the intended environment.
 
-Install the local runtime from this plugin checkout:
-
-```powershell
-node scripts\install-parallel.cjs --dry-run 'C:\work\project'
-node scripts\install-parallel.cjs 'C:\work\project'
-```
-
-Use Node.js 22.20+ or 24+. Review instruction migration, real verification commands,
-ownership, and approvals before starting. Workers must be opened in separate
-verified workspaces; terminal `cwd` is not editing-tool isolation. Automatic
-worker launch, multi-feature scheduling, and hosted parallelism are deferred.
-The cloud installer excludes the local-only coordinator skills.
-
-See the [local execution and recovery guide](parallel/README.md) for the story
-schema, command sequence, operator approvals, limits, and cleanup. Runtime tests:
-
-```powershell
-node --test tests\parallel.test.cjs
-```
-
-### Cloud-built Parallel Stories
-
-Use the local orchestrator with `/cloud-parallel` to dispatch independent
-stories through GitHub CLI. Cloud agents build separate PRs; a separate local
-evaluator reviews exact commits and the coordinator integrates them serially.
-The workflow is opt-in and does not require the local parallel installer.
-
-Use GitHub CLI 2.80+ with an eligible Copilot plan, Node.js 22.20+ or 24+,
-Git, approved story scopes, real verification commands, and repository review
-protections. See the [cloud parallel skill](skills/cloud-parallel/SKILL.md) for
-configuration, guarded merge, and recovery. Run the coordinator tests with
-`node --test tests\cloud-parallel.test.cjs`.
-
-### Manual Jira Hybrid Execution
-
-Version 1.3 adds an opt-in manually triggered Jira Cloud workflow. Run
-`/jira-plan` to read the selected sprint and reconcile Source IDs, criteria,
-dependencies, designs, and ownership with the full repository backlog. Approve
-the snapshot and story allowlist, then use `/hybrid-loop` for mixed cloud/local
-developers, independent local evaluation, and serial protected integration.
-There is no sprint watcher or automatic Jira sprint start.
-
-Local workers use separate verified workspaces or attached, bounded Copilot CLI
-processes with reviewed scoped permissions. Verification-only work uses
-baseline-bound evidence rather than a fabricated PR. Full parent-feature
-completion remains separate from sprint-subset delivery.
-
-`/jira-sync` optionally publishes accepted evidence and explicitly mapped
-workflow transitions; it is separately approved and disabled by default.
-Browser login does not authorize API clients. Configure credentials through
-environment references, never in source, prompts, or receipts.
-
-See the [manual Jira hybrid guide](hybrid/README.md) and
-[configuration template](hybrid/config.json). Existing standalone execution
-modes remain unchanged, and the hosted single-feature bundle excludes all three
-new local coordinator skills.
-
-```powershell
-node --test tests\jira.test.cjs tests\hybrid-local.test.cjs tests\hybrid.test.cjs
-```
-
-### UI and UX Design
-
-Version 1.4 adds [frontend-design](skills/frontend-design/SKILL.md) for user
-journeys, deliberate visual design, existing component/token reuse, responsive
-layouts, interaction states, accessibility, and rendered browser verification.
-It is original harness guidance informed by the
-[linked design reference](https://agenticskills.io/skills/frontend-design),
-not a vendored third-party prompt.
-
-Use `/frontend-design` directly, or let the builder load it for UI work.
-`/design-feature` uses its designer workflow; independent evaluators apply its
-read-only review guidance. Existing story ownership, design approvals, and
-report schemas remain unchanged. Non-UI work does not acquire UI requirements.
-
-GH CLI-dispatched cloud and hybrid local developers receive the same bundled
-guidance in their briefs; hybrid CLI evaluators receive it in evaluator mode.
-This needs neither the cloud installer nor access to the reference website.
-The standalone hosted distribution includes the skill as well (19 skills total).
-Existing hosted installations require the usual reviewed bundle update.
-
-For example:
-
-```text
-/frontend-design
-Build this story's customer picker with the existing portal design system.
-Verify keyboard navigation, loading/error/empty states, and mobile layouts.
-```
-
-Reload the updated plugin to discover the new skill. Prompt and packaging tests:
-
-```powershell
-node --test tests\frontend-design.test.cjs
-```
-
-## Plugin Structure
-
-```
-solution-harness-plugin/
-├── plugin.json                          # Canonical Agent Plugins 1.0 manifest
-├── .github/plugin/marketplace.json       # Named marketplace catalog
-├── com.github.copilot/
-│   ├── hooks/hooks.json                 # Versioned shared Copilot hook configuration
-│   └── agents/
-│       ├── ideator.agent.md            # Brainstorm & refine ideas before planning
-│       ├── planner.agent.md            # Idea → Plan
-│       ├── architect.agent.md          # System-level architecture & tech decisions
-│       ├── builder.agent.md            # Plan → Code (one feature at a time)
-│       ├── evaluator.agent.md          # Code → Quality grade (skeptical)
-│       ├── reviewer.agent.md           # Security & architecture review
-│       ├── janitor.agent.md            # Drift detection & cleanup
-│       └── orchestrator.agent.md       # Loop driver — runs the pipeline autonomously
-├── skills/
-│   ├── init-solution/SKILL.md          # /init-solution — new project setup
-│   ├── onboard/SKILL.md               # /onboard — existing project setup
-│   ├── add-features/SKILL.md          # /add-features — plan new capabilities
-│   ├── design-feature/SKILL.md       # /design-feature — research & design before building
-│   ├── frontend-design/SKILL.md      # /frontend-design - UI/UX design, implementation, review
-│   ├── refine-design/SKILL.md        # /refine-design — iterate on design with feedback
-│   ├── refactor/SKILL.md              # /refactor — plan improvements
-│   ├── fix-issue/SKILL.md             # /fix-issue — diagnose & fix bugs
-│   ├── sync-plan/SKILL.md             # /sync-plan — realign features after architecture changes
-│   ├── next-feature/SKILL.md          # /next-feature — what to build next
-│   ├── evaluate/SKILL.md             # /evaluate — quality evaluation
-│   ├── pre-commit/SKILL.md           # /pre-commit — validate before commit
-│   ├── status/SKILL.md               # /status — project dashboard
-│   ├── log-progress/SKILL.md         # /log-progress — record session progress
-│   ├── harness-health/SKILL.md       # /harness-health — harness self-assessment
-│   ├── testing/SKILL.md              # /testing — test patterns & runners
-│   ├── architecture-check/SKILL.md   # /architecture-check — boundary verification
-│   ├── loop/SKILL.md                 # /loop — sequential goal-bounded build loop
-│   ├── plan-execution/SKILL.md       # /plan-execution — local story dry-run planning
-│   ├── cloud-parallel/SKILL.md       # /cloud-parallel - cloud builders, local review
-│   └── parallel-loop/SKILL.md        # /parallel-loop — isolated local story execution
-├── parallel/                          # Local model, coordinator, hooks, schema, and guide
-└── scripts/
-    ├── plugin-hook.cjs                # Native payload/output adapter and hook routing
-    ├── install-parallel.cjs           # Add local runtime without replacing project instructions
-    └── install-cloud.cjs              # Optional standalone hosted runtime distribution
-```
-
-The namespace hook entry translates native `toolName`/`toolArgs` and compatible
-`Bash`/`Edit`/`Write` inputs into the existing assignment guards, and emits
-top-level Copilot decisions/context. Ordinary receipts omit tool arguments and
-results. Child completion checks assigned reports without pausing the parent
-coordinator merely because a subagent returned.
-
-Native plugin manifests, namespace components, marketplace declarations, and
-repository Copilot settings are protected from assigned workers even when an
-ownership glob would match them. Shared activation settings stay in source
-control; personal `settings.local.json` overrides are ignored.
-
-Hooks are not a security sandbox. Current Copilot command-hook timeouts continue
-through normal permissions, and stop continuations have a runtime limit. Ensure
-the runtime has its required paths, credentials, and tools, and validate actual
-decisions in the selected harness. Passing schema/unit tests does not prove
-host discovery or sandbox access.
-
-Model-free contract tests:
-
-```powershell
-node --test tests\plugin.test.cjs tests\agents.test.cjs tests\frontend-design.test.cjs
-```
-
-References: [plugin authoring](https://code.visualstudio.com/docs/agents/reference/agent-plugin-reference),
-[hook migration](https://code.visualstudio.com/docs/agent-customization/migrate-customizations#_migrate-hooks),
-[Copilot hook contracts](https://docs.github.com/en/copilot/reference/hooks-reference),
-and [native cloud plugin settings](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/configuring-agent-settings).
-
-## What Gets Created in Your Workspace
-
-When you run `/init-solution` or `/onboard`, the skill creates workspace-specific files:
-
-```
-your-project/
-├── AGENTS.md                           # Table of contents for agents
-├── .github/
-│   ├── copilot-instructions.md         # Coding standards (always-on)
-│   └── instructions/
-│       ├── docs-protection.instructions.md
-│       └── test-standards.instructions.md
-├── docs/
-│   ├── IDEA.md                         # Original idea (immutable)
-│   ├── PLAN.md                         # Product specification
-│   ├── FEATURES.json                   # Feature tracking (session state)
-│   ├── PROGRESS.md                     # Append-only session log
-│   ├── ARCHITECTURE.md                 # Module boundaries & decisions
-│   ├── trajectory.jsonl                # Agent action log (auto-captured)
-│   ├── LOOP.md                         # Loop contract: goal, scope, autonomy, escalation (/loop)
-│   ├── loop-budget.md                  # Per-run caps & live counters (/loop)
-│   └── loop-run-log.md                 # Per-iteration ledger (/loop)
-├── src/
-└── tests/
-```
-
-## Feature ID Conventions
-
-| Prefix | Use |
-|--------|-----|
-| `E` | Existing features (documented during /onboard) |
-| `F` | New features (/init-solution or /add-features) |
-| `R` | Refactoring tasks (/refactor) |
-| `B` | Bug fixes (/fix-issue) |
-
-
-
-## Requirements
-
-### Local Plugin
-- VS Code with GitHub Copilot
-- Node.js (for hooks)
-- Git (recommended)
-
-### Cloud Pilot
-- GitHub-hosted target repository with Copilot cloud agent enabled
-- Node.js 22+ and Git for installation; Node 22+ in the cloud setup
-- Approved feature scope, configured non-interactive tests, and project dependencies
-- Human PR review/merge and required CI checks
-- No running local IDE or persistent local machine required
+References: [Agent plugin authoring](https://code.visualstudio.com/docs/agents/reference/agent-plugin-reference),
+[cloud plugin settings](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/configuring-agent-settings),
+and [GitHub CLI agent tasks](https://cli.github.com/manual/gh_agent-task).

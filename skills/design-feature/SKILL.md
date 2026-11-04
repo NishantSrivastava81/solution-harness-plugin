@@ -1,6 +1,6 @@
 ---
 name: design-feature
-description: "Design a feature before building it — research latest patterns, evaluate approaches, design APIs/data models/UI, and produce a technical design document. Use after /add-features and before the builder starts implementing."
+description: "Design a feature before building it, including APIs, data models, UI, SaaS tenancy, observability, and usage metering when relevant. Produce a technical design after /add-features and before implementation."
 ---
 
 # Design Feature
@@ -35,6 +35,20 @@ journey, existing components/tokens, responsive behavior, interaction states,
 accessibility, and a browser-verification plan in the existing design document.
 Resolve consequential design choices before approval; this does not authorize
 implementation or replace the feature's agreed scope.
+
+#### SaaS and multi-tenant impact
+
+When applicable, use the approved architecture and existing capabilities:
+
+- Establish tenant context from verified identity and authorization, and preserve
+  isolation across affected data and services.
+- Protect customer data and use appropriate telemetry and audit practices.
+- For billable work, use reliable tenant-attributed usage and existing
+  entitlements; diagnostic logs are not a billing ledger.
+- Consider safe retries, resource limits, recovery, and AI provenance where relevant.
+
+Document required verification or blockers; do not add billing, infrastructure,
+or product features without approval.
 
 ### Step 2: Research Latest Patterns and Approaches
 Use web search to research:

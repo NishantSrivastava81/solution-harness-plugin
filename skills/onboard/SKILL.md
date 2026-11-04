@@ -30,6 +30,8 @@ all agents can work effectively on this codebase.
 - Identify architectural pattern (MVC, layered, microservices, monolith, etc.)
 - Find cross-cutting concerns (auth, logging, config, error handling)
 - Identify data storage
+- For multi-tenant projects, document existing isolation, observability, and
+  applicable usage controls; flag unknowns rather than inventing features.
 
 ### Code Patterns
 - Note naming conventions, formatting style, error handling patterns
@@ -51,7 +53,7 @@ Create `.github/instructions/docs-protection.instructions.md` and `.github/instr
 
 Include the narrow assigned-story exception from `/init-solution` in newly
 generated instructions, while retaining sequential execution as the default.
-Do not install or enable parallel execution automatically. For existing customized
+Do not start parallel execution automatically. For existing customized
 instructions, propose a reviewed migration instead of overwriting them; use the
 local parallel guide before confirming instruction/workspace isolation.
 

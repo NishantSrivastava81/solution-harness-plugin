@@ -1,80 +1,60 @@
 ---
 name: parallel-loop
-description: "Coordinate approved local stories in separate worktrees, with independent review and serialized integration."
+description: "Coordinate approved local stories in separate worktrees with manual ownership checks, independent review, and serial integration."
 disable-model-invocation: true
 ---
 
-# Parallel Loop
+# Guided Local Parallel Loop
 
-Run local parallel stories within one approved feature. The normal `/loop` remains
-sequential. This workflow does not launch workers into a shared VS Code editing
-root, schedule multiple features, or run hosted/cloud parallel agents.
+Run only an explicitly approved local story plan. `/loop` remains sequential.
+Read `/plan-execution` and the [parallel guide](../../parallel/README.md) first.
+One coordinator maintains the run record and checks all limits manually; no
+bundled scheduler, lease, ownership guard, or automatic recovery exists.
 
-## Prerequisites
+## Prepare
 
-1. Read the installed `.github/harness/parallel/README.md` and run `/plan-execution`.
-2. Require Node.js 22.20+ or 24+, the updated plugin, a clean named branch, real
-   tests, explicit scope/design approval, and reviewed ownership/resources.
-3. Confirm project instructions have the assigned-story exception and that each
-   worker/evaluator uses a separately opened workspace with verified editing-tool
-   isolation. Do not treat a terminal working directory as isolation.
-4. Review the run-wide time, commit, worker, lease, and attempt budgets with the
-   user. Do not silently set approval flags or expand the approved feature.
+1. Confirm a clean coordinator checkout, approved base branch and exact SHA,
+   feature/story allowlist, design, dependencies, paths, shared resources,
+   tests, and worker/time/attempt budgets. Run the real baseline tests; stop on
+   failure. Never stash, reset, or overwrite existing work.
+2. Review project instructions for the assigned-story exception. Confirm that
+   each builder and evaluator can use a separately opened workspace whose edit
+   tools target that workspace; a terminal directory alone is not isolation.
+3. Record the approved plan and actual state as described in the guide.
+   Dispatch only ready stories with nonconflicting ownership and resources.
 
-## Quick start
+## Assign and implement
 
-Use the orchestrator as the only coordinator. Run the installed CLI from the
-original project checkout:
+After explicit approval, create a new branch and worktree for an assigned story,
+replacing each quoted placeholder with an unused value:
 
 ```powershell
-node .github\harness\parallel\runtime.cjs begin --feature F001 --approve
-node .github\harness\parallel\runtime.cjs status
-node .github\harness\parallel\runtime.cjs claim --story F001-S01 --agent maker-alpha
+git worktree add -b '<new-story-branch>' '<absolute-worktree-path>' '<approved-base-sha>'
+git -C '<absolute-worktree-path>' rev-parse --show-toplevel
 ```
 
-Open the returned worktree separately and assign its context to a builder.
-Respect runtime capacity/resource checks; never reuse an active worker label.
-Only explicitly selected ready stories may be claimed.
+Open that worktree separately and verify the editing root. Give the builder the
+complete approved assignment from `/plan-execution`. The builder changes only
+its story, runs the requested checks, and returns actual results and blockers;
+it does not publish shared status or integrate. The coordinator inspects the
+changes and, with approval, creates a candidate commit for exact-SHA review.
+A candidate commit is not acceptance or permission to publish.
 
-## Required workflow
+## Review and integrate
 
-1. Builders read `context`, implement their assigned story, and call
-   `worker-report`. They do not commit, select more work, merge, deploy, or update
-   shared status. A blocker uses `worker-block --reason <reason>`.
-2. The coordinator calls `capture --story ID`. A worker commit/report alone
-   never releases dependent work.
-3. With approval, call `prepare-review --story ID --agent <checker> --approve`.
-   Open the combined candidate in a fresh evaluator workspace, distinct from
-   every builder in this run.
-4. The evaluator reviews the exact returned SHA, tests every criterion, and
-   submits `review-report` using the JSON shape in the installed guide. It may
-   write only its private report, not source or shared evaluation/status files.
-5. With approval, call `accept --approve`. Integration is serial. On any failure,
-   preserve evidence, report the blocker, and use explicit abort/release/retry
-   commands. Never resolve a candidate in place and reuse an old verdict.
-6. After all stories are integrated, call `prepare-final --agent <checker>
-   --approve`. Require a separate full-feature evaluation, including parent
-   criteria and configured regression checks, before final `accept --approve`.
-7. Report accepted story/feature SHAs, remaining blockers, budgets, and worktrees.
-   Do not push. Offer cleanup only after worker sessions are closed.
+1. Ask a fresh evaluator, independent of the builder, to inspect the exact
+   candidate and return the guide's structured verdict. Check each criterion,
+   changed path, actual check, and current base. A missing result or changed
+   candidate is a blocker.
+2. Integrate one passing candidate at a time, only with approval and according
+   to repository policy. Do not force a merge or overwrite a dirty checkout.
+   If the base advances, update the candidate through the approved repository
+   workflow and obtain fresh checks and review.
+3. Reconcile dependencies and run the relevant combined tests before starting
+   dependent work. After all stories, request a separate full-feature review
+   and regression checks before publishing parent status or progress.
 
-## Parameters and controls
-
-| Control                         | Rule                                         |
-|---------------------------------|----------------------------------------------|
-| `--feature`, `--story`           | Exact catalog/backlog IDs                    |
-| `--agent`                       | Unique builder or independent evaluator label |
-| `--approve`                     | Explicit operator decision, never inferred   |
-| `status`, `pause`, `resume`      | Durable state, checkpoint, and continuation   |
-| `heartbeat`, `release`           | Renew a live lease or fence a stopped attempt |
-| `abort-candidate`, `recover`     | Preserve failed work; reconcile interruptions |
-| `cancel`, `cleanup`              | Stop first; never discard dirty worktrees    |
-
-## Troubleshooting
-
-Pause before handing control back while workers are outstanding. Expiration,
-input drift, ambiguous requirements, failed tests, conflicting ownership,
-missing independent evidence, or moved target branches stop progress. Do not
-reset budgets, steal locks, change runtime state by hand, or use live deployment
-credentials to force completion. The manual-workspace release cannot prove
-agent identity or provide an operating-system sandbox.
+On interruption, preserve workspaces and reconcile the record with actual Git
+state and active workers. Stop on unclear ownership, failed tests, stale
+evidence, missing approval, or exhausted budgets. No worktree cleanup or push is
+implied by finishing a guided run.

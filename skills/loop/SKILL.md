@@ -5,10 +5,10 @@ description: "Run a goal-bounded autonomous loop over the harness — select, bu
 
 # Loop
 
-This command remains sequential. Use the local-only `/parallel-loop` explicitly
-for isolated stories within one approved feature. Do not silently parallelize this
-contract or run concurrent writers in one checkout. Hosted sessions continue to
-use `cloud-loop`, not the local worktree workflow.
+This command remains sequential. Use `/parallel-loop` explicitly for guided
+isolated stories within one approved feature. Do not silently parallelize this
+contract or run concurrent writers in one checkout. Hosted single-feature
+sessions use `/cloud-loop` when its prerequisites are available.
 
 Turn the harness from a human-driven pipeline into a **goal-bounded autonomous loop**.
 Instead of you typing `/next-feature` → switch to builder → build → switch to evaluator
@@ -146,7 +146,7 @@ A separate evaluator subagent does. That separation is what makes "complete" tru
 | Class | Conditions |
 |-------|-----------|
 | **SUCCESS** | All in-scope items `complete` · tests green · evaluator PASS for each |
-| **HARD KILL** | iterations ≥ cap · commits ≥ cap · a feature hit rework cap (same root cause twice) · any budget counter past cap · unrecoverable regression · a destructive action blocked by the PreToolUse hook |
+| **HARD KILL** | iterations ≥ cap · commits ≥ cap · a feature hit rework cap (same root cause twice) · any budget counter past cap · unrecoverable regression · a destructive action without explicit approval |
 | **ESCALATE** | blocked/unmet dependency · ambiguous criteria · scope creep (edits outside the active feature) · loop is uncertain |
 
 When in doubt → **stop and report**. A stopped loop makes no unattended mistakes.

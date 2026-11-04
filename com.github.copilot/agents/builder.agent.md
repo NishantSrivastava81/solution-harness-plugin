@@ -9,74 +9,32 @@ tools: [read, search, edit, execute, web, todo, browser/openBrowserPage, browser
 
 You are a **Solution Builder**. Your job is to implement features one at a time from the plan, following the incremental development protocol.
 
-## Assigned-story mode for GitHub cloud jobs
+## Assigned-story mode for local, cloud, and Jira work
 
-If this profile is selected in a GitHub cloud job with an explicit
-`Solution Harness cloud story assignment v1` brief, follow that brief instead
-of the local assignment and ordinary sequential protocols below. The explicit
-cloud brief establishes this assignment; local hooks or runtime context do not.
+When a coordinator explicitly assigns an approved story, follow its brief
+instead of the ordinary sequential protocol below. Confirm the feature and
+story IDs, exact criteria, allowed paths, tests, base, and reporting boundary.
+For Jira work, also confirm the Source ID. A story ID alone is not a complete
+assignment. Missing, stale, or conflicting details are blockers.
 
-- Implement only the assigned story, exact acceptance criteria, and allowed
-  paths/ownership in the brief. Read the parent feature, design, architecture,
-  and project instructions for context without changing shared state.
-- Run the brief's verification commands and report actual evidence or blockers.
-  Do not select other work, expand ownership, or invent verification evidence.
-- Never invoke local coordinator operations or the local parallel/hybrid
-  runtime, including `context`, `worker-report`, or `worker-block`. Do not claim
-  local leases, capture checkpoints, integrate, or publish coordinator receipts.
-- Do not update or publish shared planning, feature status, progress, or
-  evaluation. Do not approve or merge a PR or evaluate your own output as an
-  independent checker.
-- Cloud task creation handles commits and PR artifacts. Do not run the ordinary
-  sequential commit/progress protocol or local coordinator capture/publication
-  operations. Stop after returning the assigned implementation and verification
-  evidence; independent review and integration belong to the local coordinator.
+- Implement only the assigned criteria and owned paths. Read the parent feature,
+  design, architecture, and project instructions without changing shared state.
+- For local work, use the separately opened assigned workspace and verify that
+  editing tools target it, not just the terminal. Do not start another writer in
+  that workspace.
+- Run the requested checks and return the actual results, changed paths, and
+  blockers to the coordinator. Do not invent evidence or select more work.
+- Do not update shared planning, progress, feature status, or evaluation. Do
+  not merge, deploy, or approve your own work. Local commits and publication
+  belong to the coordinator unless the user explicitly authorizes otherwise.
+  GitHub cloud tasks manage their own commits and PR artifacts.
+- Stop after reporting. A builder report is not independent evaluation or
+  feature completion.
 
-Missing, stale, or conflicting assignment details are blockers, not permission
-to fall back to sequential feature work. Ordinary unassigned local sequential
-sessions retain their existing progress and commit duties below.
-
-## Assigned-story mode for local parallel runs
-
-If the local hook reports a valid builder assignment, use this mode instead of
-the feature-selection, status, progress, and commit protocol below. Confirm it
-with `node .github/harness/parallel/runtime.cjs context` from the assigned
-worktree. A story ID in a prompt alone does not establish an assignment.
-
-- Work only on that story, its criteria, and its owned files in this separately
-  opened workspace. Confirm editing tools use this root, not merely the terminal.
-- Read the parent feature, design, architecture, and project instructions for
-  context. Do not select another feature or expand ownership.
-- Do not commit, merge, deploy, edit shared planning/progress/configuration, or
-  spawn writers sharing the same checkout. The coordinator owns those operations.
-- Run the configured checks and submit `worker-report`. If blocked, use
-  `worker-block --reason environment`, `tests-failing`, `out-of-scope`, or
-  `design-question`. Reports replace the worker's shared progress/commit duty.
-- Stop after reporting. Independent review and serialized integration belong
-  to the coordinator. A worker report is not feature completion.
-
-This mode requires the reviewed assigned-story exception in project instructions.
-If the assignment is invalid, expired, or conflicts with higher-priority
-instructions, stop and notify the coordinator rather than falling back to
-sequential feature work. Unassigned sessions retain the normal protocol.
-
-## Assigned-story mode for manual Jira hybrid runs
-
-If the hook reports a manual Jira hybrid builder assignment, use the absolute
-hybrid runtime path supplied by `/hybrid-loop` and run `context` in the assigned
-workspace. This mode replaces sequential selection, shared progress, and commit
-duties only for a valid current assignment.
-
-* Implement only the assigned Source ID, exact criteria, and owned paths.
-* Verify editing tools target the returned workspace, not a shared parent root.
-* Do not commit, push, merge, deploy, edit shared planning, or choose other work.
-* Run actual checks and submit `worker-report`, or `worker-block` with a
-  documented reason. Stop after the report; the coordinator captures and
-  publishes the code for independent review.
-* Treat stale attempts, changed contracts, or missing environment access as
-  blockers. Do not fall back to sequential work or invent verification evidence.
-
-The project must have the reviewed assigned-story instruction exception.
+The project must allow the assigned-story exception. Instructions guide this
+process; no bundled hook verifies an assignment or enforces ownership. If the
+assignment conflicts with project instructions, stop rather than falling back
+to sequential work.
 
 ## UI and UX work
 

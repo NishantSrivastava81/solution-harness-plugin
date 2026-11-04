@@ -14,59 +14,29 @@ ordinary evaluation status updates. Assigned-candidate modes permit only their
 private report or returned JSON, never shared files. Do not implement fixes or
 commit.
 
-## Assigned-candidate mode for local parallel runs
+## Assigned-candidate mode for local, cloud, and Jira work
 
-If the local hook reports an evaluator assignment, run
-`node .github/harness/parallel/runtime.cjs context` in that separate workspace.
-Review only its exact candidate SHA and criteria, not every complete feature.
-This mode replaces the shared report/status-writing steps below.
+For an explicitly assigned candidate, review its exact commit and criteria in a
+separately verified workspace instead of evaluating the entire feature catalog.
+Use a fresh session independent of the builder; changing an agent label does not
+make the builder independent.
 
-- Be a fresh session independent of every builder in the run. Do not reuse a
-  builder session under a different label.
-- Inspect the combined changes and run the actual required tests. Do not edit
-  source, resolve conflicts, commit, or update shared evaluation/progress files.
-- Write the commit-bound verdict only to the private `report_path` returned by
-  context, using the JSON shape in `.github/harness/parallel/README.md`.
-  Submit it through `review-report`. Cover each exact criterion with specific
-  evidence; FAIL if a human/environment requirement has not been verified.
-- For a final feature candidate, check all parent criteria and regression gates,
-  with `story_id: null`. Passing individual stories is insufficient.
-- Stop after the report. The coordinator alone accepts, integrates, and publishes
-  status. Changed source or stale assignment requires a new candidate/review.
+- Confirm the run, feature, story, candidate SHA, base SHA, and criteria with
+  the coordinator. Missing or changed assignment details are blockers.
+- Inspect the actual changes and run the required checks. Do not edit source,
+  resolve conflicts, commit, merge, or update shared status or progress.
+- Return the structured verdict described in the
+  [parallel guide](../../parallel/README.md), with
+  evidence for every criterion and actual command results. FAIL when required
+  evidence, permissions, or environment access is missing.
+- Verification-only work needs observed, authorized evidence, not a fabricated
+  PR. Full-feature completion requires a separate review of all parent criteria
+  and regression gates; passing individual stories is insufficient.
+- Stop after reporting. If the candidate, base, or criteria change, require a
+  fresh review. The coordinator alone accepts and integrates the result.
 
-Use the ordinary protocol only when there is no parallel assignment. Invalid
-assignment state is a blocker, not permission to fall back to shared writes.
-
-## Cloud PR candidate mode
-
-When the local orchestrator requests `/cloud-parallel` review, inspect only the
-assigned story or final feature at the exact candidate SHA and review worktree.
-Use a fresh session independent of every cloud builder. Verify each supplied
-criterion, inspect scope and security, and run the actual required tests. Do not
-edit source, shared planning, progress, evaluation, or runtime receipts.
-
-Return the exact JSON report required by the cloud-parallel skill, including
-the run, feature, story, SHA, evaluator label, verdict, and evidence for each
-criterion. The coordinator submits the report and decides whether to merge.
-This mode replaces the ordinary feature-wide status and report-writing protocol.
-
-## Manual Jira hybrid candidate mode
-
-For a `/hybrid-loop` assignment, run `context` using the supplied absolute
-hybrid runtime path in the separate evaluator workspace. Be a fresh session,
-independent of every builder, and follow that exact candidate rather than the
-ordinary whole-catalog evaluation protocol.
-
-* Inspect actual source and run real checks. Do not edit source, merge, commit,
-  operate live infrastructure, or update shared status/progress.
-* Write only the private JSON report, with exact run/story/feature/SHA/evaluator
-  identity, `assignment_nonce`, and evidence for every supplied criterion.
-* Verification-only work needs observed authorized environment evidence, not a
-  generated PR. FAIL when required access or observations are missing.
-* Final selected-story criteria are prefixed by Source ID and may use null
-  feature/story IDs. Parent-feature completion has a separate full review.
-* Stop after reporting. Changed SHA, base, contract, or nonce requires a fresh
-  review; do not reuse an old PASS or fall back to shared-file writes.
+The coordinator must check the evidence manually; no bundled hook validates
+the assignment or report.
 
 ## UI and UX evaluation
 
@@ -125,8 +95,8 @@ For each feature, score 1-5 on:
 ### Step 4: Write the Evaluation Report (docs/EVALUATION.md)
 
 Only ordinary unassigned evaluation writes this shared report. Assigned local,
-cloud PR, and manual Jira hybrid candidates use their private/returned JSON
-protocols above instead.
+cloud PR, and manual Jira hybrid candidates return their structured verdict to
+the coordinator instead.
 
 ```markdown
 # Evaluation Report — [date]

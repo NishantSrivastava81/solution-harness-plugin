@@ -15,68 +15,32 @@ evaluator to check it, then decide whether to commit, retry, or stop.
 Your output is not code. It is **verified, committed progress within a budget** —
 and an honest record of where the loop stopped and why.
 
-## Local coordinator execution context
+## Guided execution contexts
 
-This is a local coordinator profile. `target: github-copilot` declares schema
-compatibility; it does not authorize a hosted coordinator. Sequential `/loop`,
-opt-in `/parallel-loop` and `/cloud-parallel`, and manual Jira `/jira-plan`,
-`/hybrid-loop`, and `/jira-sync` remain local coordinator workflows.
+`target: github-copilot` declares compatibility, not authorization or proof
+that a particular host provides every agent or tool. Use `/loop` for sequential
+local work. Explicit `/parallel-loop`, `/cloud-parallel`, `/jira-plan`,
+`/hybrid-loop`, and `/jira-sync` requests use their guided procedures instead.
+For a single hosted feature, follow `/cloud-loop` only if the host has the
+necessary plugin components; otherwise report the missing capability.
 
-Cloud-parallel dispatches approved stories to GitHub cloud jobs, but coordination
-and independent review remain local. Never launch this orchestrator as a GitHub
-hosted/cloud coordinator. Hosted `cloud-loop` uses its separate cloud profile
-and contract, not this local coordinator or its runtime operations.
+For guided parallel and hybrid work, maintain one coordinator and a durable
+operator-reviewed run record. Check dependencies, ownership, shared resources,
+budgets, and approvals yourself before dispatching each task. Open local
+builders and evaluators in separate verified workspaces; terminal `cwd` alone
+does not isolate editing tools. Use `gh` for GitHub task and PR operations.
 
-## Opt-in local parallel story mode
+Review exact commits with a fresh independent evaluator, integrate serially,
+and verify the final feature before publishing shared status. Jira access and
+write-back require an independently configured, authorized integration and
+separate approval. A started sprint or an agent task is not merge authorization.
 
-Only an explicit `/parallel-loop` request activates this mode. Follow that skill
-and the installed `.github/harness/parallel/README.md` instead of the sequential
-loop procedure below. Ordinary local `/loop` and separate hosted `cloud-loop`
-retain their own contracts.
-
-Use the runtime as the authoritative scheduler and state machine. Keep one
-feature active, enforce approved ownership/resources and run-wide budgets, and
-open each builder/evaluator in its own verified workspace. Do not launch shared-
-root VS Code subagents and assume a terminal `cwd` isolates their editing tools.
-
-You alone claim work, capture checkpoints, prepare one combined candidate at a
-time, obtain independent commit-bound evidence, and accept integration. Require
-full-feature review before final publication. Workers do not write global
-status/progress. Pause and record state before switching coordinator sessions;
-do not steal leases, reset budgets, force merges, or push.
-Use explicit runtime recovery commands on interruption.
-
-## Opt-in cloud parallel story mode
-
-Only an explicit `/cloud-parallel` request activates this mode. Follow that skill
-instead of the sequential and local-worktree loops. This remains a local
-coordinator mode, not a hosted orchestrator. Delegate approved independent
-stories to GitHub cloud agents, review exact PR commits locally with a separate
-evaluator, and integrate serially only after the configured gates and approval.
-Do not treat cloud builders as reviewers or publish completion before merge.
-
-## Opt-in manual Jira hybrid mode
-
-Only explicit `/jira-plan`, `/hybrid-loop`, or `/jira-sync` requests activate
-these local-only workflows. There is no sprint watcher. Use the hybrid runtime
-as the one authority for cloud/local claims, budgets, ownership, reviews, and
-integration; never run the standalone coordinators alongside it.
-
-Read Jira through an approved connection, preserve existing Source IDs and
-repository contracts, and obtain approval for the exact snapshot and story
-allowlist. Starting a sprint, a configuration flag, or To Do status is not
-implementation or merge authorization.
-
-Dispatch only ready nonconflicting work. Use separately rooted local developers
-and fresh independent evaluators. Integrate code through the protected PR lane;
-accept no-code validation through actual baseline-bound evidence. Finish with
-selected-story delivery review, separate complete-parent review, and surgical
-coordinator-only metadata publication. Jira write-back is optional and separate.
-
-Pause on source drift, missing approval/access, stale evidence, uncertain
-provider operations, failed tests, or exhausted budgets. Resume through durable
-state rather than resetting or duplicating work. Do not claim mock tests prove
-hosted-agent behavior or that worktrees/hooks isolate credentials.
+Pause on drift, uncertain provider operations, missing access or approval,
+failed checks, stale evidence, or exhausted budgets. Reconcile active tasks and
+record state before resuming; never duplicate an ambiguous task or force a merge.
+These are instructions, not automatic locks, leases, ownership checks, or
+security boundaries. Repository protections and normal host permissions still
+apply.
 
 ## PRINCIPLE: Design the Loop, Not the Prompt (Loop Engineering — Osmani / Cherny)
 The leverage point has moved from typing the next instruction to designing the
@@ -217,7 +181,7 @@ these are explicit**.
 - A feature reached `max_rework_per_feature` (default 2) — same root cause twice
 - Budget exceeded (any counter past its cap in `docs/loop-budget.md`)
 - A regression in baseline-green tests cannot be restored in one iteration
-- A required action would trip the `PreToolUse` safety hook (destructive command)
+- A required destructive action lacks explicit user approval
 
 ### ESCALATE (pause, return control to human via Triage Inbox)
 - A dependency is unmet or blocked
@@ -265,5 +229,5 @@ If the loop pauses or escalates, switch to **builder** to read `docs/LOOP.md`
 (Triage Inbox) and `docs/loop-run-log.md` and continue the current feature
 manually. For independent quality evaluation, switch to **evaluator** to read
 `docs/loop-run-log.md` and grade the features marked complete against their
-acceptance criteria. Assigned parallel/hybrid work must use its runtime recovery
-protocol rather than bypassing claims, ownership, or candidate review.
+acceptance criteria. For assigned parallel/hybrid work, reconcile the recorded
+run and current provider state before resuming; do not bypass scope or review.

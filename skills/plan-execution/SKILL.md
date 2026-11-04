@@ -1,59 +1,51 @@
 ---
 name: plan-execution
-description: "Plan dependency-aware story batches and ownership for local parallel work. Dry-run only; never launches workers."
+description: "Plan approved story batches, dependencies, ownership, and verification for guided local or GitHub cloud work. Does not launch workers."
 ---
 
 # Plan Execution
 
-Prepare an executable story plan without changing delivery status or launching
-agents. This skill is local-only; hosted projects continue to use `cloud-loop`.
+Create a reviewable plan without launching tasks or changing delivery status.
+This is a guided analysis, not an automatic scheduler or validator.
 
-## Prerequisites
+## Inputs and readiness
 
-* Read the project's feature catalog, progress, plan, architecture, and existing backlog.
-* Use the installed local parallel runtime with Node.js 22.20+ or 24+.
-* If it is absent, obtain approval to run the plugin's
-  `scripts/install-parallel.cjs --dry-run <project-root>`, review conflicts, then
-  install. Read the resulting `.github/harness/parallel/README.md`.
+1. Read the project's feature catalog, progress, plan, architecture, existing
+   backlog, and referenced designs. The feature catalog remains authoritative.
+2. With the user's approval, decompose only the requested scope. Preserve
+   original Source IDs and existing criteria. Use the
+   [story schema](../../parallel/backlog.schema.json) for new backlogs.
+3. Check each story's testable criteria and one-based parent-criterion
+   coverage. Verify evidence for stories already marked done.
+4. Trace all story, feature, and architecture prerequisites, including those
+   outside the selected subset. Unknown dependencies, cycles, missing criteria,
+   or unresolved design gates are blockers.
+5. Identify owned paths and shared resources, including tests and infrastructure.
+   Treat overlapping or uncertain ownership/resources as conflicts and
+   serialize them. Separate branches do not eliminate logical conflicts.
 
-## Quick start
+## Propose and approve
 
-1. Keep the feature catalog authoritative. Reuse an existing epic/feature/story
-   backlog; do not replace feature definitions or flatten away source evidence.
-2. With the user's approval, decompose only the requested feature's missing
-   stories. Use version 1 of the installed backlog schema. Assign stable IDs,
-   testable criteria, parent-criterion indexes, and explicit dependencies.
-3. Identify design questions, human/environment gates, shared files, test
-   resources, and ownership boundaries. Do not claim that separate branches
-   eliminate logical or infrastructure conflicts.
-4. Propose scoped `allowed_paths` and resource locks in the parallel config.
-   Keep `mode: sequential` until execution is explicitly approved. Do not
-   self-approve designs, migration, or workspace isolation.
-5. Run the planner and explain its batches and blockers. Do not invent a
-   different queue that bypasses its feature or architecture prerequisites.
+Show a table of story IDs, dependencies, owned paths, shared resources, proposed
+local/cloud route, verification commands, and blockers. A dependent story is
+ready only after its prerequisites are integrated and accepted. Default to one
+worker unless parallelism is explicitly approved.
 
-## Parameters
+Agree on the exact feature/story allowlist, base branch and SHA, designs,
+workspace isolation, verification, worker/time/attempt/commit budgets, and permitted
+cloud data sharing. Obtain approval before creating worktrees or cloud tasks.
+Review existing project instructions before proposing an assigned-story
+exception; never override higher-priority instructions.
 
-| Parameter   | Default                  | Meaning                                  |
-|-------------|--------------------------|------------------------------------------|
-| `--feature` | All incomplete features  | Limit the derived plan to one feature    |
-| `--root`    | Current project root     | Read-only project selection              |
+Choose an approved durable location for a run record. The
+[parallel guide](../../parallel/README.md) describes the record and independent
+verdict. Do not include credentials or unnecessary private data. A manually
+maintained record is not a lock or automatic drift detector.
 
-## Script reference
+Each assignment must name the run, feature and story, Source ID if applicable,
+exact criteria, allowed paths, base SHA, workspace or repository, tests, limits,
+and reporting boundary. Reconcile actual state before each dispatch.
 
-From the project root:
-
-```powershell
-node .github\harness\parallel\runtime.cjs plan --feature F001
-```
-
-The output is hypothetical within-feature batches, not permission to dispatch
-multiple features. Save a derived execution-plan artifact only if requested.
-Use `/parallel-loop` for an explicitly approved local run.
-
-## Troubleshooting
-
-Cycles, unknown dependencies, missing criterion coverage, or missing done-story
-evidence are planning errors. Missing ownership, architecture gates, and
-unapproved designs are blockers, not reasons to weaken validation. Ask the user
-to resolve ambiguous scope or product decisions before changing source plans.
+Use `/parallel-loop`, `/cloud-parallel`, or `/hybrid-loop` only after the user
+approves the corresponding execution. If required information is absent or
+uncertain, report the blocker instead of inventing a ready batch.

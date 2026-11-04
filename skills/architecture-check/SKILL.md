@@ -1,6 +1,6 @@
 ---
 name: architecture-check
-description: "Verify that the codebase follows the documented architecture. Checks for module boundary violations, circular dependencies, and cross-cutting concern leaks."
+description: "Verify documented module boundaries, cross-cutting concerns, and applicable SaaS tenant isolation, observability, and billing boundaries."
 ---
 
 # Architecture Check
@@ -25,6 +25,12 @@ Trace import chains to detect cycles (A imports B, B imports C, C imports A).
 
 #### Cross-Cutting Concern Leaks
 Auth, logging, config, database access should go through dedicated modules only.
+
+#### SaaS Boundaries (when applicable)
+Check tenant isolation and authorization across affected data and services,
+telemetry privacy, and any applicable usage or entitlement boundaries. Report
+evidence and gaps against the documented architecture; guidance is not
+enforcement or compliance certification.
 
 ### 3. Report
 

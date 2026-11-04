@@ -1,64 +1,37 @@
 ---
 name: jira-sync
-description: "Publish independently accepted manual hybrid delivery evidence and explicitly mapped Jira transitions. Idempotent, separately approved, and disabled by default."
+description: "Publish independently accepted delivery evidence or explicitly approved Jira transitions using an authorized Jira integration."
 disable-model-invocation: true
 ---
 
 # Jira Evidence Sync
 
-Publish evidence for confirmed hybrid delivery without rebuilding completed
-stories. Do not equate agent completion, PR creation, implementation acceptance,
-QA, release, or business Done.
+Publish only independently accepted delivery evidence. This workflow is manual,
+optional, and separately approved; implementation, PR creation, QA, release,
+and business Done are different states.
 
 ## Prerequisites
 
-* Complete `/hybrid-loop`, including independent selected-story delivery review
-  and local metadata publication.
-* Enable `jira_writeback` in the approved external configuration only after the
-  user authorizes Jira writes. Read the [guide](../../hybrid/README.md).
-* Keep credentials in environment references. Verify Jira issue-security and
-  workflow permissions, not merely browser login.
-* If transitions are authorized, configure both the transition ID and its
-  destination status ID. Do not hard-code a universal Done transition.
-
-## Quick start
-
-Resolve the [runtime](../../hybrid/runtime.cjs) relative to this installed skill:
-
-```powershell
-node '<absolute plugin path>\hybrid\runtime.cjs' sync --root '<project root>' --run '<published run ID>' --approve
-```
-
-Omitting `--run` selects the most recently published hybrid run in that
-repository. The operation creates no branches, commits, or coding tasks.
+- Complete the relevant `/hybrid-loop` review and identify the accepted commit,
+  PR, or authorized verification evidence.
+- Use an independently configured Jira MCP server or client with permission
+  to read and write the selected issue. GitHub CLI does not provide Jira access.
+- Obtain explicit authorization for each comment and each transition. Confirm
+  the issue's actual available transition and destination; never assume a
+  universal Done transition.
 
 ## Protocol
 
-1. Confirm the run's repository, Jira site, immutable issue IDs, Source IDs, and
-   accepted commit/evidence identities.
-2. Re-read the issue requirements. Changed criteria or dependencies require
-   explicit reconciliation, not a success comment over a different contract.
-3. Publish a bounded evidence comment linking the accepted PR or commit.
-   Stable markers prevent duplicate comments on retry.
-4. Apply only an explicitly configured available transition. Already reaching
-   its configured destination is idempotent.
-5. Report each result. Ambiguous or failed writes remain pending/uncertain; do
-   not re-run already merged implementation.
+1. Re-read the issue, Source ID, criteria, and dependencies. If they differ from
+   the approved run, stop and reconcile before writing.
+2. Prepare a concise evidence comment with a stable run/story marker and the
+   accepted PR or commit. Search existing comments for that marker and inspect
+   the result before creating a new one.
+3. After approval, use the authorized Jira integration to publish the comment
+   or explicitly mapped transition. Verify the resulting comment or status.
+4. Record the actual result and any failure. If a write is ambiguous, re-read
+   Jira and reconcile it before retrying; a manual marker is not an
+   exactly-once or concurrency guarantee.
 
-## Parameters
-
-| Parameter   | Default            | Meaning                              |
-|-------------|--------------------|--------------------------------------|
-| `--root`    | Current root       | Original coordinator repository      |
-| `--run`     | Last published run | Recorded accepted hybrid delivery    |
-| `--approve` | Disabled           | Separate Jira write authorization    |
-
-## Troubleshooting
-
-The publisher refuses concurrent evidence writers. Recover a stale sync lock
-only after confirming its recorded process stopped. Do not steal a live lock,
-edit receipts, or suppress HTTP/permission/transition failures.
-
-No sprint is started, closed, reordered, or repopulated by this skill.
-
-> Brought to you by solution-harness
+Do not include credentials, raw private comments, or unnecessary user data.
+Never start, close, reorder, or repopulate a sprint as a side effect.

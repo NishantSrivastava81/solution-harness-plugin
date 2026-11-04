@@ -1,102 +1,25 @@
-name: Local parallel story tests
+name: Native Plugin Contract Tests
 
-on:
-  pull_request:
-    paths:
-      - "parallel/**"
-      - "hybrid/**"
-      - "jira/**"
-      - "com.github.copilot/**"
-      - ".github/plugin/**"
-      - "plugin.json"
-      - "skills/**"
-      - "hooks/**"
-      - "scripts/install-*.cjs"
-      - "scripts/cloud-parallel-hook.cjs"
-      - "scripts/plugin-hook.cjs"
-      - "cloud/**"
-      - "tests/parallel.test.cjs"
-      - "tests/cloud-parallel.test.cjs"
-      - "tests/frontend-design.test.cjs"
-      - "tests/plugin.test.cjs"
-      - "tests/agents.test.cjs"
-      - "tests/helpers/**"
-      - "tests/hybrid*.test.cjs"
-      - "tests/jira.test.cjs"
-      - ".github/workflows/parallel-tests.yml"
-  push:
-    paths:
-      - "parallel/**"
-      - "hybrid/**"
-      - "jira/**"
-      - "com.github.copilot/**"
-      - ".github/plugin/**"
-      - "plugin.json"
-      - "skills/**"
-      - "hooks/**"
-      - "scripts/install-*.cjs"
-      - "scripts/cloud-parallel-hook.cjs"
-      - "scripts/plugin-hook.cjs"
-      - "cloud/**"
-      - "tests/parallel.test.cjs"
-      - "tests/cloud-parallel.test.cjs"
-      - "tests/frontend-design.test.cjs"
-      - "tests/plugin.test.cjs"
-      - "tests/agents.test.cjs"
-      - "tests/helpers/**"
-      - "tests/hybrid*.test.cjs"
-      - "tests/jira.test.cjs"
-      - ".github/workflows/parallel-tests.yml"
+on: [push, pull_request, workflow_dispatch]
 
 permissions:
   contents: read
 
 jobs:
-  local-parallel:
+  plugin-contract:
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        node: ["22.20.0", "24.x"]
+        node: [22, 24]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-      - run: node --test tests/parallel.test.cjs
-
-  cloud-parallel:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        node: ["22.20.0", "24.x"]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node }}
-      - run: node --test tests/cloud-parallel.test.cjs tests/frontend-design.test.cjs tests/plugin.test.cjs tests/agents.test.cjs
-
-  manual-jira-hybrid:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        node: ["22.20.0", "24.x"]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-      - run: node --test tests/jira.test.cjs tests/hybrid-local.test.cjs tests/hybrid.test.cjs
+          package-manager-cache: false
+      - run: node tests/plugin.test.mjs

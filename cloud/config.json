@@ -1,8 +1,0 @@
-{
-    "version": 1,
-    "cloud_parallel_enabled": false,
-    "feature_ids": [],
-    "max_minutes": 40,
-    "max_rework": 1,
-    "verification": []
-}
