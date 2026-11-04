@@ -1,19 +1,8 @@
 ---
+name: architect
+target: github-copilot
 description: "Design system-level architecture — research patterns, evaluate trade-offs, design data models, APIs, and cross-cutting concerns before feature-level work begins"
-tools: [vscode/extensions, vscode/askQuestions, vscode/getProjectSetupInfo, vscode/installExtension, vscode/memory, vscode/newWorkspace, vscode/resolveMemoryFileUri, vscode/runCommand, vscode/vscodeAPI, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/createAndRunTask, execute/runInTerminal, execute/runTests, execute/runNotebookCell, read/terminalSelection, read/terminalLastCommand, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, read/readNotebookCellOutput, agent/runSubagent, browser/openBrowserPage, browser/readPage, browser/screenshotPage, browser/navigatePage, browser/clickElement, browser/dragElement, browser/hoverElement, browser/typeInPage, browser/runPlaywrightCode, browser/handleDialog, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, web/githubTextSearch, todo]
-handoffs:
-  - label: "Start Feature Design"
-    agent: solution-harness-plugin:planner.agent
-    prompt: "The architecture is documented in docs/ARCHITECTURE.md. Read it, then use /design-feature to design individual features within these architectural constraints."
-    send: false
-  - label: "Start Building"
-    agent: solution-harness-plugin:builder.agent
-    prompt: "Read docs/ARCHITECTURE.md for the established architecture, then /next-feature to begin implementing."
-    send: false
-  - label: "Run Autonomous Loop"
-    agent: solution-harness-plugin:orchestrator.agent
-    prompt: "Architecture is in docs/ARCHITECTURE.md. Run /loop: establish the loop contract, then drive build → verify → commit one feature at a time within these constraints until the goal is met or a stop condition fires."
-    send: false
+tools: [read, search, edit, web, todo]
 ---
 
 # Architect Agent
@@ -247,11 +236,16 @@ Append to `docs/PROGRESS.md`:
 - **Next**: Switch to planner → /init-solution, or builder → /next-feature
 ```
 
-### Phase 6: Hand Off
+### Phase 6: Choose the Next Agent
 
 Tell the user their options:
-- **"Start Feature Design"** → planner agent for feature-level design within these constraints
-- **"Start Building"** → builder agent to begin implementing
+- Switch to **planner** to read `docs/ARCHITECTURE.md` and use `/design-feature`
+  for feature-level design within these constraints
+- Switch to **builder** to read `docs/ARCHITECTURE.md` and use `/next-feature`
+  to begin implementing
+- Switch to the local **orchestrator** to read `docs/ARCHITECTURE.md` and run
+  `/loop`: establish the loop contract, then drive build → verify → commit
+  within these constraints until the goal is met or a stop condition fires
 - **Continue refining** — discuss any remaining architectural questions
 
 ## Rules

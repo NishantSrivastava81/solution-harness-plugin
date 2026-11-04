@@ -47,6 +47,7 @@ function handle(cwd, event, payload = {}, cached = null) {
     }
     if (event === 'Stop') {
         if (closed) return {};
+        if (payload.internal_subagent_stop && role === 'coordinator') return {};
         if (role === 'coordinator') {
             requireValue(run.paused || !['active', 'starting', 'publishing'].includes(run.status), 'Pause the hybrid run before handing off; use recover-publish for interrupted metadata publication');
         } else if (role === 'builder' && run.jobs[assignment.story_id]?.status === 'running') {

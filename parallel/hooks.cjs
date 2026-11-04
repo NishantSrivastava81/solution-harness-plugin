@@ -76,6 +76,7 @@ function handle(root, event, payload = {}) {
     }
     if (event === 'Stop') {
         if (marker) return stopWorker(root, marker, run);
+        if (payload.internal_subagent_stop) return {};
         requireValue(run.status !== 'active' && run.status !== 'starting', 'Pause the coordinator with the runtime before handing off; do not edit shared progress to satisfy the sequential stop hook');
         return {};
     }

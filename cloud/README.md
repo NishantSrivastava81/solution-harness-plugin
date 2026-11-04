@@ -1,10 +1,48 @@
-# Solution Harness For Copilot Cloud Agent
+---
+title: Solution Harness for Copilot Cloud Agent
+description: Optional standalone hosted runtime and native plugin activation for GitHub cloud jobs.
+---
 
 The cloud distribution is a bounded, one-feature pilot. It preserves the local
-VS Code plugin and supplies native repository customizations for GitHub-hosted
+Copilot plugin and supplies native repository customizations for GitHub-hosted
 execution. Your machine does not need to remain online after delegation.
 
+## Native plugin activation
+
+Current Copilot cloud configuration can enable a published marketplace plugin
+through `.github/copilot/settings.json` in the application repository. Preserve
+existing settings and add:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "solution-harness-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "NishantSrivastava81/solution-harness-plugin"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "solution-harness@solution-harness-marketplace": true
+  }
+}
+```
+
+Use a published, verified migrated version. Marketplace names are stable
+identifiers, not inferred repository names. Plugin activation makes context
+available; it does not launch tasks, approve designs, or install the standalone
+runtime below. Confirm actual components and dependencies in the cloud job.
+The native plugin's cloud hook path does not impose local progress/coordinator
+gates; the explicit task and any installed cloud-loop runtime own delivery.
+
+See [official cloud plugin settings](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/configuring-agent-settings).
+
 ## Install Into A Target Repository
+
+This installer remains an optional choice for the dedicated one-feature
+cloud-loop runtime, hosted profiles, receipts, and setup workflow. It is not
+required merely to dispatch a GH CLI cloud story from a local coordinator.
 
 Use Node.js 22 or newer. From the solution-harness-plugin directory:
 

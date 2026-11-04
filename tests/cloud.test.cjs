@@ -255,7 +255,7 @@ test('distinguishes the recorded root identity from child stop events', context 
 
 test('builds native cloud profiles and a reproducible content-hashed bundle without changing local files', () => {
     const sourceRoot = path.resolve(__dirname, '..');
-    const localBuilder = fs.readFileSync(path.join(sourceRoot, 'agents/builder.agent.md'));
+    const localBuilder = fs.readFileSync(path.join(sourceRoot, 'com.github.copilot/agents/builder.agent.md'));
     const files = buildBundle();
     assert.deepEqual(buildBundle(), files);
     assert.equal([...files.keys()].filter(filename => filename.endsWith('.agent.md')).length, 3);
@@ -267,7 +267,7 @@ test('builds native cloud profiles and a reproducible content-hashed bundle with
         }
     }
     assert.deepEqual(files.get('.github/skills/testing/SKILL.md'), fs.readFileSync(path.join(sourceRoot, 'skills/testing/SKILL.md')));
-    assert.deepEqual(fs.readFileSync(path.join(sourceRoot, 'agents/builder.agent.md')), localBuilder);
+    assert.deepEqual(fs.readFileSync(path.join(sourceRoot, 'com.github.copilot/agents/builder.agent.md')), localBuilder);
     const manifest = JSON.parse(files.get('.github/harness/manifest.json'));
     for (const [filename, hash] of Object.entries(manifest.files)) {
         assert.equal(crypto.createHash('sha256').update(files.get(filename)).digest('hex'), hash);

@@ -135,3 +135,39 @@ were not generated or modified by this implementation.
 * No application UI, live provider task, Jira data, or remote Git history was
   changed. Packaging and fake-process tests do not establish rendered UI quality
   or live hosted-agent behavior.
+
+## 2026-11-04 - Shared Copilot plugin compatibility
+
+* Reproduced failures for canonical manifest discovery, marketplace metadata,
+  and current Bash hook decisions before changing implementation. The root
+  cause was retaining legacy Local packaging, mandatory tool names, and nested
+  hook outputs while treating them as shared Copilot runtime contracts.
+* Migrated version 1.5.0 to Agent Plugins 1.0, moved all eight profiles into
+  `com.github.copilot/agents`, and published a named catalog at
+  `.github/plugin/marketplace.json`. Preserved skill names and execution modes.
+  Replaced Local handoffs and mandatory editing/delegation tools with native
+  capabilities and explicit agent selection.
+* Added versioned namespace hooks and one native input/output adapter. Covered
+  camelCase toolArgs/results and compatible Bash/Edit/Write inputs, top-level
+  decisions/context, assignment ownership, private reports, child-stop timing,
+  cloud/local gate separation, and argument-free ordinary receipts.
+* Fixed the standalone cloud runtime's native initialPrompt handling while
+  retaining explicit story-mode approval. Protected native manifests,
+  namespace components, marketplaces, and Copilot settings from assigned
+  workers. Added local-settings ignore rules without ignoring shared activation.
+* Documented native repository plugin activation, optional standalone cloud
+  installation, update/migration controls, runtime tool differences, hook
+  timeout limitations, and the unchanged manual Jira workflow.
+* Validated 187 cases in the full regression run on Node.js 24.21.0. A further
+  29-case hosted/runtime-contract run passed, including three added native
+  prompt/ownership/ignore regressions: 190 distinct cases verified overall.
+  The pre-existing Windows symlink fixture was explicitly excluded because its
+  known EPERM prevents fixture creation; its Linux coverage is unchanged.
+* Used the real Copilot CLI 1.0.105 with an isolated COPILOT_HOME to register and
+  browse the marketplace, install/enumerate version 1.5.0, and discover all 24
+  enabled plugin skills. No authentication or model session was started.
+  Removed the isolated test registration and temporary CLI afterward.
+* No live Jira data, cloud jobs, application settings, global Copilot
+  configuration, or remote Git history were changed. Fresh VS Code sessions,
+  real agent behavior, sandbox grants, and remote CI still need operator smoke
+  checks; schema/discovery tests are not proof of those behaviors.

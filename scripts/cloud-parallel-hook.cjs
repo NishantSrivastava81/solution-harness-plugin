@@ -47,6 +47,7 @@ function handle(cwd, event, payload = {}) {
         return { hookSpecificOutput: { hookEventName: event, additionalContext: `CLOUD PARALLEL ${role.toUpperCase()}: ${detail}` } };
     }
     if (event === 'Stop') {
+        if (payload.internal_subagent_stop && role === 'coordinator') return {};
         if (role === 'coordinator' && run.status === 'active' && !run.paused) {
             return deny(event, 'Pause the cloud parallel coordinator before handing off; do not edit shared progress to satisfy the sequential stop hook');
         }

@@ -2,6 +2,8 @@
 .env.*
 !.env.example
 !.env.*.example
+.github/copilot/settings.local.json
+.claude/settings.local.json
 
 node_modules/
 coverage/

@@ -1,15 +1,8 @@
 ---
+name: planner
+target: github-copilot
 description: "Expand a solution idea into a full product specification and feature breakdown"
-tools: [vscode/extensions, vscode/askQuestions, vscode/getProjectSetupInfo, vscode/installExtension, vscode/memory, vscode/newWorkspace, vscode/resolveMemoryFileUri, vscode/runCommand, vscode/vscodeAPI, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/createAndRunTask, execute/runInTerminal, execute/runTests, execute/runNotebookCell, read/terminalSelection, read/terminalLastCommand, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, read/readNotebookCellOutput, agent/runSubagent, browser/openBrowserPage, browser/readPage, browser/screenshotPage, browser/navigatePage, browser/clickElement, browser/dragElement, browser/hoverElement, browser/typeInPage, browser/runPlaywrightCode, browser/handleDialog, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, web/githubTextSearch, todo]
-handoffs:
-  - label: "Start Building"
-    agent: solution-harness-plugin:builder.agent
-    prompt: "Read docs/PLAN.md and docs/FEATURES.json, then begin implementing the first feature."
-    send: false
-  - label: "Run Autonomous Loop"
-    agent: solution-harness-plugin:orchestrator.agent
-    prompt: "The plan is in docs/PLAN.md and docs/FEATURES.json. Run /loop: establish the loop contract, then drive build → verify → commit one feature at a time until the goal is met or a stop condition fires."
-    send: false
+tools: [read, search, edit, web, todo]
 ---
 
 # Planner Agent
@@ -94,8 +87,9 @@ Document the technical architecture:
 ### Optional local story execution plan
 
 For local parallel development, use `/plan-execution` after feature and
-architecture planning. For cloud-built stories, use `/cloud-parallel` after
-approving the story dependencies, ownership, and verification commands. Keep feature definitions authoritative; add an
+architecture planning. For cloud-built stories, use `/cloud-parallel` in a local
+**orchestrator** session after approving the story dependencies, ownership, and
+verification commands. Keep feature definitions authoritative; add an
 approved story breakdown with traceable criteria and explicit dependencies.
 Include inherited feature prerequisites, architecture gates, shared-file
 ownership, and test-resource conflicts. Resolve open design decisions before
@@ -110,6 +104,14 @@ When choosing technologies and architecture, **prefer harnessable choices**:
 - **Standard project layouts** — follow conventions (src/, tests/, config/) so agents navigate easily
 - **Avoid opaque dependencies** — prefer libraries the agent can fully reason about in-repo
 - Commit to a **topology** (REST API, CLI tool, web app) — narrowing the output space makes the harness more effective (Ashby's Law of Requisite Variety)
+
+## Next Steps
+
+Once the plan is approved, switch to **builder** to read `docs/PLAN.md` and
+`docs/FEATURES.json` and implement the first feature. Alternatively, switch to
+the local **orchestrator** and request `/loop`: establish the loop contract,
+then drive build → verify → commit one feature at a time until the goal is met
+or a stop condition fires.
 
 ## Rules
 - Be **ambitious but realistic** about scope

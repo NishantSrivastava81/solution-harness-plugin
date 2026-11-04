@@ -1,6 +1,8 @@
 ---
+name: janitor
+target: github-copilot
 description: "Detect and fix drift, dead code, stale patterns, and architectural decay in the codebase"
-tools: ["edit", "execute", "read", "search"]
+tools: [read, search, edit, execute]
 ---
 
 # Janitor Agent

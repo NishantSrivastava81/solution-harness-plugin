@@ -295,7 +295,7 @@ function handleHook(root, event, payload) {
         const previous = readState(root);
         let mode = previous?.mode || 'cloud-loop';
         if (!payload.parentAgentId && !payload.parent_agent_id && previous?.sessionId !== sessionId) {
-            const prompt = payload.initial_prompt ?? process.env.COPILOT_AGENT_PROMPT ?? '';
+            const prompt = payload.initialPrompt ?? payload.initial_prompt ?? process.env.COPILOT_AGENT_PROMPT ?? '';
             const story = typeof prompt === 'string' && prompt.startsWith('Solution Harness cloud story assignment v1\n');
             if (story && readJson(root, '.github/harness/config.json').cloud_parallel_enabled !== true) {
                 throw new Error('Cloud story assignments require explicit cloud_parallel_enabled approval.');

@@ -11,9 +11,19 @@ A single-install plugin that provides everything you need to build, refactor, an
 |-----------|-------|----------|
 | **Agents** | 8 | ideator, planner, architect, builder, evaluator, reviewer, janitor, orchestrator |
 | **Skills** | 24 | /init-solution, /onboard, /add-features, /design-feature, /frontend-design, /refine-design, /refactor, /fix-issue, /sync-plan, /next-feature, /evaluate, /pre-commit, /status, /log-progress, /harness-health, /testing, /architecture-check, /loop, /plan-execution, /parallel-loop, /cloud-parallel, /jira-plan, /hybrid-loop, /jira-sync |
-| **Hooks** | 4 | SessionStart (inject status), Stop (enforce progress log), PreToolUse (block dangerous commands), PostToolUse (trajectory logging) |
+| **Hooks** | 5 | sessionStart (inject status), agentStop (progress/assignment gates), subagentStop (assigned reports), preToolUse (command/ownership checks), postToolUse (argument-free receipts) |
 
 ## Install
+
+Version 1.5 uses the canonical **Agent Plugins 1.0** format for the shared
+Copilot runtime in VS Code and Copilot CLI. Select **Copilot** as the VS Code
+Session Target. Skills stay under `skills/`; agents and hooks use the
+`com.github.copilot/` namespace. The package no longer depends on Local-only
+tool names or handoff buttons.
+
+Use a supported Node.js 22.20+ or 24+ on the PATH inherited by the agent host,
+hooks, and CLI processes. Terminal changes alone do not update an already
+running host's environment.
 
 ### Option A: From Git URL
 In VS Code, run `Chat: Install Plugin From Source` from the Command Palette and enter the repo URL.
@@ -29,6 +39,36 @@ Clone this repo, then add to your VS Code settings:
 ```
 
 ### Option C: GitHub Copilot Cloud Agent (Pilot)
+
+To enable the published plugin's skills and profiles natively, add the following
+to the **application repository's** `.github/copilot/settings.json`, preserving
+other settings:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "solution-harness-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "NishantSrivastava81/solution-harness-plugin"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "solution-harness@solution-harness-marketplace": true
+  }
+}
+```
+
+Publish and verify the migrated marketplace before using these defaults.
+Enabling a plugin does not launch work, install project dependencies, approve
+designs, or create the standalone cloud-loop runtime. Local Jira/parallel
+coordinators remain local-only. Confirm cloud component availability in the
+actual job; local plugin installation is not automatically copied there.
+
+The installer below is an **optional standalone cloud-loop distribution**, not
+the only way to give a GH CLI-dispatched task plugin context. Use it when you
+want its dedicated hosted profiles, run state, hooks, and verification setup.
 
 Install the cloud distribution into a target Git repository with Node.js 22+:
 
@@ -66,9 +106,41 @@ node --test tests/cloud.test.cjs
 
 ## Usage
 
+### CLI installation and migration
+
+Install a local development checkout with:
+
+```powershell
+copilot plugin install 'D:\path\to\solution-harness-plugin'
+copilot plugin list --json
+```
+
+For the published marketplace:
+
+```powershell
+copilot plugin marketplace add NishantSrivastava81/solution-harness-plugin
+copilot plugin install solution-harness@solution-harness-marketplace
+```
+
+The catalog is published at `.github/plugin/marketplace.json`, with the stable
+marketplace name `solution-harness-marketplace`. Direct plugin installations
+and marketplace registrations are different operations.
+
+Before updating an active installation, pause and reconcile coordinator work,
+back up any customized project files, and start a fresh Copilot session after
+updating. Do not patch installation caches or enable old and migrated hooks
+together. Reinstall a path-sourced development copy when the client caches it.
+For VS Code, use **Chat: Update Plugins** or the Customizations editor and
+verify enabled components in the intended harness.
+
+Agent Plugins format migration is not merely adding `$schema`: component
+locations, tool/delegation semantics, and hook contracts changed together.
+The older VS Code Local harness's handoff buttons are intentionally replaced
+with explicit agent selection; model selection alone does not test migration.
+
 ### New Project
 1. Open an empty folder in VS Code
-2. **(Optional)** Switch to the **ideator** agent — brainstorm scope, research similar solutions, define MVP, produce docs/SPEC.md. Click **"Initialize Project from Spec"** when ready.
+2. **(Optional)** Switch to the **ideator** agent — brainstorm scope, research similar solutions, define MVP, produce docs/SPEC.md. Select **planner** and run `/init-solution` when ready.
 3. Switch to the **planner** agent → `/init-solution`
 4. **(Recommended)** Switch to the **architect** agent — research tech stack, design data model, define module boundaries, establish cross-cutting patterns. Produces a thorough docs/ARCHITECTURE.md.
 5. Switch to **builder** agent → `/next-feature` → `/design-feature` → build → `/evaluate`
@@ -230,16 +302,19 @@ node --test tests\frontend-design.test.cjs
 
 ```
 solution-harness-plugin/
-├── plugin.json                          # Plugin manifest
-├── agents/
-│   ├── ideator.agent.md                # Brainstorm & refine ideas before planning
-│   ├── planner.agent.md                 # Idea → Plan
-│   ├── architect.agent.md               # System-level architecture & tech decisions
-│   ├── builder.agent.md                 # Plan → Code (one feature at a time)
-│   ├── evaluator.agent.md              # Code → Quality grade (skeptical)
-│   ├── reviewer.agent.md               # Security & architecture review
-│   ├── janitor.agent.md                # Drift detection & cleanup
-│   └── orchestrator.agent.md           # Loop driver — runs the pipeline autonomously
+├── plugin.json                          # Canonical Agent Plugins 1.0 manifest
+├── .github/plugin/marketplace.json       # Named marketplace catalog
+├── com.github.copilot/
+│   ├── hooks/hooks.json                 # Versioned shared Copilot hook configuration
+│   └── agents/
+│       ├── ideator.agent.md            # Brainstorm & refine ideas before planning
+│       ├── planner.agent.md            # Idea → Plan
+│       ├── architect.agent.md          # System-level architecture & tech decisions
+│       ├── builder.agent.md            # Plan → Code (one feature at a time)
+│       ├── evaluator.agent.md          # Code → Quality grade (skeptical)
+│       ├── reviewer.agent.md           # Security & architecture review
+│       ├── janitor.agent.md            # Drift detection & cleanup
+│       └── orchestrator.agent.md       # Loop driver — runs the pipeline autonomously
 ├── skills/
 │   ├── init-solution/SKILL.md          # /init-solution — new project setup
 │   ├── onboard/SKILL.md               # /onboard — existing project setup
@@ -263,15 +338,39 @@ solution-harness-plugin/
 │   ├── cloud-parallel/SKILL.md       # /cloud-parallel - cloud builders, local review
 │   └── parallel-loop/SKILL.md        # /parallel-loop — isolated local story execution
 ├── parallel/                          # Local model, coordinator, hooks, schema, and guide
-├── hooks/
-│   └── hooks.json                     # Lifecycle hook configuration
 └── scripts/
+    ├── plugin-hook.cjs                # Native payload/output adapter and hook routing
     ├── install-parallel.cjs           # Add local runtime without replacing project instructions
-    ├── session-start.js               # Inject project status at session start
-    ├── session-stop.js                # Enforce progress logging before stop
-    ├── pre-tool-use.js                # Block dangerous terminal commands
-    └── post-tool-use.js               # Log agent trajectories
+    └── install-cloud.cjs              # Optional standalone hosted runtime distribution
 ```
+
+The namespace hook entry translates native `toolName`/`toolArgs` and compatible
+`Bash`/`Edit`/`Write` inputs into the existing assignment guards, and emits
+top-level Copilot decisions/context. Ordinary receipts omit tool arguments and
+results. Child completion checks assigned reports without pausing the parent
+coordinator merely because a subagent returned.
+
+Native plugin manifests, namespace components, marketplace declarations, and
+repository Copilot settings are protected from assigned workers even when an
+ownership glob would match them. Shared activation settings stay in source
+control; personal `settings.local.json` overrides are ignored.
+
+Hooks are not a security sandbox. Current Copilot command-hook timeouts continue
+through normal permissions, and stop continuations have a runtime limit. Ensure
+the runtime has its required paths, credentials, and tools, and validate actual
+decisions in the selected harness. Passing schema/unit tests does not prove
+host discovery or sandbox access.
+
+Model-free contract tests:
+
+```powershell
+node --test tests\plugin.test.cjs tests\agents.test.cjs tests\frontend-design.test.cjs
+```
+
+References: [plugin authoring](https://code.visualstudio.com/docs/agents/reference/agent-plugin-reference),
+[hook migration](https://code.visualstudio.com/docs/agent-customization/migrate-customizations#_migrate-hooks),
+[Copilot hook contracts](https://docs.github.com/en/copilot/reference/hooks-reference),
+and [native cloud plugin settings](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/configuring-agent-settings).
 
 ## What Gets Created in Your Workspace
 

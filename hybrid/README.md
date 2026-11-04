@@ -24,6 +24,13 @@ GH CLI-driven target; it remains available for standalone hosted cloud-loop
 users. Existing installed cloud hooks still require explicit migration before
 story dispatch.
 
+Version 1.5 migrates the plugin package to Agent Plugins 1.0 and the shared
+Copilot hook/agent contract. Select Copilot as the VS Code Session Target or use
+Copilot CLI. The workflow remains manually triggered, with the same story
+allowlist, independent review, and serial integration. Pause existing runs and
+verify the migrated hook decisions before resuming; never activate duplicate
+legacy hooks.
+
 ## Requirements
 
 * The updated full local Solution Harness plugin

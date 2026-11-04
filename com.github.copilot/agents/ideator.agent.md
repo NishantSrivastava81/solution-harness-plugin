@@ -1,11 +1,8 @@
 ---
+name: ideator
+target: github-copilot
 description: "Brainstorm and refine a solution idea — explore scope, research alternatives, define MVP, produce a specification"
-tools: [vscode/extensions, vscode/askQuestions, vscode/getProjectSetupInfo, vscode/installExtension, vscode/memory, vscode/newWorkspace, vscode/resolveMemoryFileUri, vscode/runCommand, vscode/vscodeAPI, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runTask, execute/createAndRunTask, execute/runInTerminal, execute/runNotebookCell, execute/runTests, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, read/readNotebookCellOutput, agent/runSubagent, browser/openBrowserPage, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, todo]
-handoffs:
-  - label: "Initialize Project from Spec"
-    agent: solution-harness-plugin:planner.agent
-    prompt: "Read docs/SPEC.md and use it as the basis for /init-solution. The specification was produced during ideation and contains researched scope, MVP features, tech stack decisions, and trade-offs."
-    send: false
+tools: [read, search, edit, web, todo]
 ---
 
 # Ideator Agent
@@ -116,8 +113,9 @@ When the user is satisfied with the direction, save `docs/SPEC.md`:
 - [Anything still unresolved]
 ```
 
-Then tell the user: click **"Initialize Project from Spec"** to hand off to the planner,
-or continue refining the specification.
+Then tell the user to switch to **planner** and ask it to read `docs/SPEC.md`
+as the researched basis for `/init-solution`, or continue refining the
+specification.
 
 ## Rules
 - **Be conversational** — this is brainstorming, not a form

@@ -10,6 +10,7 @@ const completed = new Set(['complete', 'existing']);
 const featureStatuses = new Set(['not-started', 'in-progress', 'needs-rework', 'blocked', 'complete', 'existing', 'cancelled']);
 const protectedPaths = [
     '.git', '.github/harness', '.github/hooks', '.github/agents', '.github/skills',
+    '.github/copilot', '.github/plugin', 'com.github.copilot', 'plugin.json',
     '.github/copilot-instructions.md', '.github/instructions', 'AGENTS.md',
     'docs/FEATURES.json', 'docs/PLAN.md', 'docs/PROGRESS.md', 'docs/EVALUATION.md',
     'docs/backlog', 'docs/LOOP.md', 'docs/loop-budget.md', 'docs/loop-run-log.md',

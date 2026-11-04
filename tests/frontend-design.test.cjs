@@ -90,12 +90,12 @@ test('hybrid reviewer briefs keep exact criteria and read-only JSON output with 
 });
 
 test('local design/build/review and hosted profiles explicitly load frontend-design in the correct role', () => {
-    for (const file of ['agents/builder.agent.md', 'agents/evaluator.agent.md', 'skills/design-feature/SKILL.md']) {
+    for (const file of ['com.github.copilot/agents/builder.agent.md', 'com.github.copilot/agents/evaluator.agent.md', 'skills/design-feature/SKILL.md']) {
         assert.match(read(file), /\/frontend-design/);
     }
     assert.match(read('skills/design-feature/SKILL.md'), /designer mode/);
-    assert.match(read('agents/evaluator.agent.md'), /Do not edit source or redesign/);
-    assert.match(read('agents/evaluator.agent.md'), /browser\/readPage/);
+    assert.match(read('com.github.copilot/agents/evaluator.agent.md'), /Do not edit source or redesign/);
+    assert.match(read('com.github.copilot/agents/evaluator.agent.md'), /browser\/readPage/);
     for (const role of ['builder', 'evaluator']) {
         assert.match(read(`cloud/agents/${role}.agent.md`), /\.github\/skills\/frontend-design\/SKILL\.md/);
         assert.ok(read(`cloud/agents/${role}.agent.md`).includes(`${role} mode`));
@@ -120,7 +120,7 @@ test('hosted bundles carry the identical skill and helper with valid content has
 
 test('plugin versions and documented skill counts match both distributions', () => {
     const plugin = JSON.parse(read('plugin.json'));
-    const marketplace = JSON.parse(read('marketplace.json'));
+    const marketplace = JSON.parse(read('.github/plugin/marketplace.json'));
     assert.equal(plugin.version, marketplace.plugins[0].version);
     const skills = fs.readdirSync(path.join(root, 'skills')).filter(name => fs.existsSync(path.join(root, 'skills', name, 'SKILL.md')));
     assert.equal(skills.length, 24);

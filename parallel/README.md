@@ -70,6 +70,11 @@ exception. Installing files cannot override higher-priority instructions.
 Set `instructions_migration_confirmed` only after that review. Reload the updated
 plugin; installing the runtime alone does not activate its hook routing.
 
+The version 1.5 plugin uses the shared Copilot runtime and versioned namespaced
+hooks. Its adapter preserves the local runtime's internal assignment guards but
+returns current top-level Copilot decisions. Pause existing runs before updating
+the plugin/runtime, and do not run old and migrated hook copies together.
+
 Commit the installed runtime, reviewed instruction changes, backlog, and approved
 config before starting. The coordinator never stashes or discards existing work.
 

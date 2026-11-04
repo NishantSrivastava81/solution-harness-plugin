@@ -463,24 +463,15 @@ test('rejects missing tests, unapproved protections, and worker counts above the
 });
 
 
-function pluginHook(root, event, payload = {}) {
-    const hook = require('../hooks/hooks.json').hooks[event][0];
-    const command = process.platform === 'win32' ? hook.windows || hook.command : hook.command;
-    assert.ok(command.startsWith('node -e "') && command.endsWith('"'));
-    const result = spawnSync(process.execPath, ['-e', command.slice(9, -1)], {
-        cwd: root, input: JSON.stringify(payload), encoding: 'utf8', timeout: 15000,
-        env: { ...process.env, PLUGIN_ROOT: path.resolve(__dirname, '..') }
-    });
-    assert.equal(result.status, 0, result.stderr);
-    return JSON.parse(result.stdout);
-}
+const pluginHook = require('./helpers/plugin-hook.cjs');
 
 test('routes cloud coordinator and local evaluator hooks without leaking tool payloads', t => {
     const data = fixture(t), remote = fakeGitHub(data);
     coordinator.begin(data.root, data.configPath, true, remote.gh);
-    assert.match(pluginHook(data.root, 'SessionStart').hookSpecificOutput.additionalContext, /CLOUD PARALLEL COORDINATOR/);
-    assert.equal(pluginHook(data.root, 'Stop').hookSpecificOutput.decision, 'block');
-    const payload = { tool_name: 'run_in_terminal', tool_input: { command: 'private-input-marker' }, tool_response: 'private-output-marker' };
+    assert.match(pluginHook(data.root, 'SessionStart').additionalContext, /CLOUD PARALLEL COORDINATOR/);
+    assert.equal(pluginHook(data.root, 'Stop').decision, 'block');
+    assert.deepEqual(pluginHook(data.root, 'SubagentStop', { agentId: 'child' }), {});
+    const payload = { toolName: 'bash', toolArgs: { command: 'private-input-marker' }, toolResult: { textResultForLlm: 'private-output-marker' } };
     assert.deepEqual(pluginHook(data.root, 'PostToolUse', payload), {});
     assert.equal(fs.existsSync(path.join(data.root, 'docs', 'trajectory.jsonl')), false);
     assert.equal(git(data.root, ['status', '--porcelain']), '');
@@ -493,9 +484,11 @@ test('routes cloud coordinator and local evaluator hooks without leaking tool pa
     remote.state.sessions[item.session_id].state = 'completed';
     remote.state.prs[item.pr].headRefOid = candidate.sha;
     coordinator.prepare(data.root, 'F001-S01', null, candidate.workspace, 'checker', true, remote.gh);
-    assert.match(pluginHook(candidate.workspace, 'SessionStart').hookSpecificOutput.additionalContext, /CLOUD PARALLEL EVALUATOR/);
-    assert.equal(pluginHook(candidate.workspace, 'PreToolUse', { tool_name: 'create_file', tool_input: { filePath: 'src/alpha.cjs' } }).hookSpecificOutput.permissionDecision, 'deny');
-    assert.equal(pluginHook(candidate.workspace, 'PreToolUse', { tool_name: 'run_in_terminal', tool_input: { command: 'git commit -am changed' } }).hookSpecificOutput.permissionDecision, 'deny');
+    assert.match(pluginHook(candidate.workspace, 'SessionStart').additionalContext, /CLOUD PARALLEL EVALUATOR/);
+    assert.equal(pluginHook(candidate.workspace, 'PreToolUse', { toolName: 'create', toolArgs: { path: 'src/alpha.cjs' } }).permissionDecision, 'deny');
+    assert.equal(pluginHook(candidate.workspace, 'PreToolUse', { tool_name: 'Write', tool_input: { file_path: 'src/alpha.cjs' } }).permissionDecision, 'deny');
+    assert.equal(pluginHook(candidate.workspace, 'PreToolUse', { toolName: 'bash', toolArgs: { command: 'git commit -am changed' } }).permissionDecision, 'deny');
+    assert.equal(pluginHook(candidate.workspace, 'PreToolUse', { tool_name: 'Bash', tool_input: { command: 'git commit -am changed' } }).permissionDecision, 'deny');
     assert.deepEqual(pluginHook(candidate.workspace, 'PreToolUse', { tool_name: 'run_in_terminal', tool_input: { command: 'node --test' } }), {});
     assert.deepEqual(pluginHook(candidate.workspace, 'Stop'), {});
     coordinator.control(data.root, 'pause', null, true, remote.gh);
@@ -504,7 +497,7 @@ test('routes cloud coordinator and local evaluator hooks without leaking tool pa
 
 test('preserves ordinary plugin hook behavior when no cloud run is active', t => {
     const data = fixture(t);
-    assert.match(pluginHook(data.root, 'SessionStart').hookSpecificOutput.additionalContext, /PROJECT STATUS/);
+    assert.match(pluginHook(data.root, 'SessionStart').additionalContext, /PROJECT STATUS/);
     assert.deepEqual(pluginHook(data.root, 'PostToolUse', { tool_name: 'run_in_terminal', tool_input: { command: 'echo example' }, tool_response: 'ok' }), {});
     assert.equal(fs.existsSync(path.join(data.root, 'docs', 'trajectory.jsonl')), true);
 });

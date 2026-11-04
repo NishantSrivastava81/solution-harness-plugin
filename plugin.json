@@ -1,11 +1,10 @@
 {
+    "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
     "name": "solution-harness",
     "description": "A complete harness for building solutions with GitHub Copilot — agents, skills, and hooks for planning, building, evaluating, reviewing, and maintaining code quality",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "author": {
         "name": "Solution Harness"
     },
-    "skills": "skills/",
-    "agents": "agents/",
-    "hooks": "hooks/hooks.json"
+    "repository": "https://github.com/NishantSrivastava81/solution-harness-plugin"
 }

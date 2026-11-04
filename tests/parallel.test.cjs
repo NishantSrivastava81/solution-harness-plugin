@@ -535,41 +535,41 @@ test('installer and edit guards reject linked parent directories without followi
     assert.deepEqual(fs.readdirSync(outside), []);
 });
 
-function runHook(root, event, payload = {}) {
-    const definition = require('../hooks/hooks.json').hooks[event][0];
-    const command = process.platform === 'win32' ? definition.windows || definition.command : definition.command;
-    assert.ok(command.startsWith('node -e "') && command.endsWith('"'));
-    const result = spawnSync(process.execPath, ['-e', command.slice(9, -1)], {
-        cwd: root, input: JSON.stringify(payload), encoding: 'utf8', timeout: 10000
-    });
-    assert.equal(result.status, 0, result.stderr);
-    return JSON.parse(result.stdout);
-}
+const runHook = require('./helpers/plugin-hook.cjs');
 
-test('effective inline hooks route ESM worker assignments, fence edits and omit raw payloads', t => {
+test('native plugin hooks route ESM worker assignments, fence edits and omit raw payloads', t => {
     const { root } = fixture(t, data => { data.files = { 'package.json': '{"type":"module"}\n' }; });
     cloudInstaller.installBundle(root, localInstaller.buildBundle(), { preserveExisting: localInstaller.seedFiles });
     runtime.git(root, ['add', '.']);
     runtime.git(root, ['commit', '--quiet', '-m', 'test: install local runtime']);
     const old = new Date('2000-01-01T00:00:00Z');
     fs.utimesSync(path.join(root, 'docs/PROGRESS.md'), old, old);
-    assert.equal(runHook(root, 'Stop').hookSpecificOutput.decision, 'block');
-    assert.match(runHook(root, 'SessionStart').hookSpecificOutput.additionalContext, /PROJECT STATUS/);
+    assert.equal(runHook(root, 'Stop').decision, 'block');
+    assert.match(runHook(root, 'SessionStart').additionalContext, /PROJECT STATUS/);
     runtime.begin(root, 'F001', true);
     const worker = runtime.claim(root, 'F001-S01', 'maker');
-    assert.match(runHook(worker.worktree, 'SessionStart').hookSpecificOutput.additionalContext, /LOCAL PARALLEL ASSIGNMENT/);
-    assert.equal(runHook(worker.worktree, 'Stop').hookSpecificOutput.decision, 'block');
+    assert.match(runHook(worker.worktree, 'SessionStart').additionalContext, /LOCAL PARALLEL ASSIGNMENT/);
+    assert.equal(runHook(worker.worktree, 'Stop').decision, 'block');
     assert.deepEqual(runHook(worker.worktree, 'PreToolUse', {
         tool_name: 'replace_string_in_file', tool_input: { filePath: path.join(worker.worktree, 'src/alpha.cjs') }
+    }), {});
+    assert.deepEqual(runHook(worker.worktree, 'preToolUse', {
+        toolName: 'edit', toolArgs: { path: path.join(worker.worktree, 'src/alpha.cjs') }
     }), {});
     const denied = runHook(worker.worktree, 'PreToolUse', {
         tool_name: 'apply_patch',
         tool_input: { patch: `*** Begin Patch\n*** Update File: ${path.join(worker.worktree, 'docs/FEATURES.json')}\n*** End Patch` }
     });
-    assert.equal(denied.hookSpecificOutput.permissionDecision, 'deny');
+    assert.equal(denied.permissionDecision, 'deny');
     assert.equal(runHook(worker.worktree, 'PreToolUse', {
         tool_name: 'run_in_terminal', tool_input: { command: 'git commit -am changed' }
-    }).hookSpecificOutput.permissionDecision, 'deny');
+    }).permissionDecision, 'deny');
+    assert.equal(runHook(worker.worktree, 'preToolUse', {
+        tool_name: 'Edit', tool_input: { file_path: path.join(worker.worktree, 'docs', 'FEATURES.json') }
+    }).permissionDecision, 'deny');
+    assert.equal(runHook(worker.worktree, 'preToolUse', {
+        toolName: 'powershell', toolArgs: { command: 'git push origin main' }
+    }).permissionDecision, 'deny');
     const payload = { tool_name: 'run_in_terminal', tool_input: { command: 'sensitive-payload-marker' }, tool_response: 'sensitive-result-marker' };
     assert.deepEqual(runHook(worker.worktree, 'PostToolUse', payload), {});
     const log = fs.readFileSync(path.join(runtime.git(worker.worktree, ['rev-parse', '--absolute-git-dir']), 'harness-events.jsonl'), 'utf8');
@@ -589,7 +589,7 @@ test('effective inline hooks route ESM worker assignments, fence edits and omit 
 
 test('customization metadata and command surfaces agree with the installed runtime', () => {
     const plugin = require('../plugin.json');
-    assert.equal(plugin.version, require('../marketplace.json').plugins[0].version);
+    assert.equal(plugin.version, require('../.github/plugin/marketplace.json').plugins[0].version);
     for (const name of ['plan-execution', 'parallel-loop']) {
         const skill = fs.readFileSync(path.join(__dirname, '../skills', name, 'SKILL.md'), 'utf8');
         assert.match(skill, new RegExp(`^---\\r?\\nname: ${name}\\r?\\ndescription: "[^"\\r\\n]+"\\r?\\n`));
