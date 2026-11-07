@@ -148,6 +148,103 @@ run([
             /UI restrictions do not replace server-side authorization/i
         ], 'frontend-design');
     }],
+    ['frontend discovery and briefs map approved criteria to existing UI', () => {
+        const parsed = frontmatter(read('skills', 'frontend-design', 'SKILL.md'));
+        includesAll(parsed.metadata.description, [
+            /design briefs/i, /information architecture/i,
+            /semantic tokens/i, /design critiques/i
+        ], 'frontend discovery');
+        assert.notStrictEqual(parsed.metadata['disable-model-invocation'], 'true');
+        assert.ok(parsed.body.split('\n').length < 500, 'frontend skill must remain bounded');
+        assert.ok(!/^## References?\s*$/m.test(parsed.body), 'frontend skill must not include a reference section');
+        includesAll(parsed.body, [
+            /component APIs/i, /Storybook/i, /CSS custom properties/i,
+            /Tailwind/i, /theme providers/i, /repository paths/i,
+            /known facts from assumptions/i, /experience principles/i,
+            /out of scope/i,
+            /\| Criterion \| User step \/ state \| Component \(reuse \/ extend \/ new\) \| Owned path \| Verification \|/,
+            /does not create new criteria or authorize shared edits/i
+        ], 'frontend brief');
+    }],
+    ['frontend structure and responsive planning preserve navigation and context', () => {
+        includesAll(skill('frontend-design'), [
+            /information architecture/i, /primary action/i,
+            /URL and query-parameter conventions/i, /deep links/i,
+            /back navigation/i, /recovery paths/i,
+            /smallest supported viewport/i, /content-driven breakpoints/i,
+            /Do not rewrite working desktop-first styles/i,
+            /DOM reading order/i, /long labels and realistic data/i,
+            /complete in-scope vertical slices/i,
+            /rather than starting a parallel task list/i
+        ], 'frontend structure');
+    }],
+    ['frontend aesthetics and tokens preserve supported themes and dependency approvals', () => {
+        includesAll(skill('frontend-design'), [
+            /aesthetic direction.*concrete decisions/i,
+            /Task-focused/, /Editorial/, /Warm and understated/, /Expressive and graphic/,
+            /Do not reject existing system fonts/i,
+            /semantic tokens for surfaces, text, borders, primary actions, focus, and status/i,
+            /typography roles.*spacing.*motion values/i,
+            /Do not add dark mode or a theme toggle unless approved/i,
+            /system-preference handling.*manual overrides.*preference persistence/i,
+            /Unsupported themes are out of scope/i,
+            /font-induced layout shifts/i, /performance budgets/i,
+            /external dependencies need normal project approval/i,
+            /outside assigned ownership require coordinator approval/i
+        ], 'frontend visual system');
+    }],
+    ['frontend critique is evidence-backed without replacing the report or approval process', () => {
+        includesAll(skill('frontend-design'), [
+            /independent evaluators perform read-only critique/i,
+            /existing report fields, not a replacement schema/i,
+            /\| Expected \| Observed \| Evidence \| Impact \| Next step \|/,
+            /required rework from optional suggestions/i,
+            /subjective preferences do not become new acceptance criteria/i,
+            /Do not use an aggregate aesthetic score.*criterion failure or missing evidence/i,
+            /Measure contrast and pointer targets/i,
+            /Screenshots.*cannot prove working interactions/i,
+            /needs no external fetch/i
+        ], 'frontend critique');
+        includesAll(skill('design-feature'), [
+            /information architecture/i, /aesthetic direction/i,
+            /semantic tokens/i, /supported theme scope/i,
+            /component\/state inventory/i, /existing design document/i,
+            /do not create a competing design folder or task catalog/i
+        ], 'frontend design handoff');
+    }],
+    ['frontend recommendations fit actual product needs and verified framework versions', () => {
+        includesAll(skill('frontend-design'), [
+            /confirmed framework versions/i,
+            /ask rather than silently choosing a default/i,
+            /version-sensitive patterns against official documentation/i,
+            /audience, task frequency, content density, and device constraints/i,
+            /references as hypotheses, not proof of usability, conversion gains, or compliance/i,
+            /No third-party search runtime or database is bundled/i
+        ], 'frontend context');
+        includesAll(skill('design-feature'), [
+            /Ground recommendations in the actual framework and user task/i
+        ], 'frontend stack handoff');
+    }],
+    ['frontend interaction and data checks preserve usable truthful accessible presentation', () => {
+        includesAll(skill('frontend-design'), [
+            /icons in the existing approved set/i,
+            /icon-only controls accessible names/i,
+            /hover, focus, active, selected, and disabled states/i,
+            /must not depend on hover alone/i,
+            /obscuring content or keyboard focus/i,
+            /only when charts or data tables are in scope/i,
+            /bars for category comparisons, lines for trends/i,
+            /Label units, time range, series, and aggregation/i,
+            /zero-based quantitative bar scales/i,
+            /missing data from zero/i, /accessible data tables/i,
+            /labels or patterns as well as color/i,
+            /Test realistic volume/i,
+            /Do not substitute native-platform units for CSS pixels/i
+        ], 'frontend data and interactions');
+        includesAll(skill('design-feature'), [
+            /chart\/table selection, truthful labeling, and accessible alternatives/i
+        ], 'frontend data handoff');
+    }],
     ['frontend guidance keeps role boundaries and measurable accessibility checks', () => {
         includesAll(skill('frontend-design'), [
             /Non-UI tasks do not acquire UI work/i, /keyboard operation/i,

@@ -190,3 +190,41 @@ were not generated or modified by this implementation.
 * No cloud tasks, Jira writes, application repositories, remote history, or
   global plugin settings were changed. Actual host discovery, cloud and Jira
   behavior, and the updated remote CI matrix still require an approved check.
+
+## 2026-11-07 - Expanded frontend design workflow
+
+* Expanded [`/frontend-design`](../skills/frontend-design/SKILL.md) with original
+  guidance inspired by Designer Skills (Apache-2.0) and UI UX Pro Max (MIT).
+  Added bounded UI discovery, criterion-mapped briefs and component/state
+  inventories, information architecture, deliberate visual direction, semantic
+  tokens, and evidence-backed critique.
+* Added context- and stack-aware recommendations, consistent icons and
+  interaction states, truthful accessible charts/tables, and content-driven
+  responsive planning. Preserved existing design systems, supported theme
+  scope, dependency approvals, measurable web accessibility checks, and
+  designer/builder/independent-evaluator boundaries.
+* Updated the feature-design handoff and contributor documentation. Both
+  references are optional; no third-party search tooling, databases, new skills,
+  competing design artifacts, or dependencies were added.
+* Added six focused guidance contract checks. The combined
+  `node --test tests/plugin.test.mjs tests/workflows.test.mjs` run passed eight
+  packaging checks and 19 workflow checks: 27 passed, one failed, none skipped.
+  The same unrelated CLI capability failure occurred before and after changes:
+  installed GitHub CLI 2.82.0 does not support `gh agent-task list --json`.
+  Its existing test and workflow guidance were left unchanged.
+* `git diff --check` passed. No application UI, live provider operations,
+  installed plugin cache, global settings, or remote history were changed.
+  Contract checks do not establish live host invocation or rendered UI behavior;
+  update/reload the plugin and start a fresh session to use the revised guidance.
+
+The plugin has no feature catalog to update. This entry records the requested
+harness change without creating or changing application features.
+
+## 2026-11-07 - Frontend skill reference removal
+
+* Removed the reference section from `/frontend-design`, preserving its branding
+  and moving self-contained execution guidance into the quick start.
+* Removed source-URL assertions and added a check that the skill has no reference
+  section. All 27 packaging and guidance checks passed; the same pre-existing
+  GitHub CLI capability check failed because `gh agent-task list` lacks `--json`.
+* `git diff --check` passed. No other skill behavior or dependencies changed.

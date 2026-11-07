@@ -103,6 +103,37 @@ establish project-specific plans, feature state, progress, and instructions.
 Use `/next-feature`, `/design-feature`, the builder, and `/evaluate` for
 incremental delivery. `/frontend-design` supplies UI and accessibility guidance.
 
+### Frontend design
+
+Use [`/frontend-design`](skills/frontend-design/SKILL.md) for UI planning,
+implementation, or review. It follows a proportional sequence: a design brief,
+information architecture, purposeful visual direction and semantic tokens,
+usable implementation, then rendered verification and structured critique.
+It also covers stack-aware recommendations, consistent icons and interaction
+states, and truthful, accessible charts and data tables when they are in scope.
+
+```text
+/frontend-design Design the account settings flow using existing components.
+Map approved criteria to components and states; explain mobile behavior and
+supported themes before implementation.
+
+/frontend-design Review the approved settings candidate against its brief.
+Report expected versus observed behavior with viewport, state, and test evidence.
+```
+
+The skill inventories existing components and styles rather than replacing the
+design system. New themes, fonts, dependencies, and consequential design changes
+still need approval. Designers use the existing feature-design document;
+builders stay within owned paths; independent evaluators inspect the actual
+candidate without editing it. No separate design workspace or new orchestration
+is required.
+
+The staged approach takes inspiration from
+[Designer Skills](https://github.com/julianoczkowski/designer-skills) and
+[UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), with
+original guidance adapted to harness scope and reporting boundaries. Their
+search tooling and databases are not bundled or required.
+
 ### SaaS-aware guidance
 
 Existing skills consider tenant isolation, observability, usage, and B2B UX

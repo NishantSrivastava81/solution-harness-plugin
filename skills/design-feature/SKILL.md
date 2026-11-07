@@ -31,10 +31,16 @@ If not specified, pick the highest-priority `"not-started"` feature from docs/FE
 4. Read the existing codebase — identify integration points, existing patterns, related code
 
 For a UI feature, load `/frontend-design` in designer mode. Include the user
-journey, existing components/tokens, responsive behavior, interaction states,
+journey, information architecture, aesthetic direction, existing components and
+semantic tokens, supported theme scope, responsive behavior, interaction states,
 accessibility, and a browser-verification plan in the existing design document.
-Resolve consequential design choices before approval; this does not authorize
-implementation or replace the feature's agreed scope.
+For data-rich UI, include chart/table selection, truthful labeling, and accessible
+alternatives. Ground recommendations in the actual framework and user task.
+Map approved criteria to a component/state inventory with reuse decisions, owned
+paths, and verification. Keep this proportional to the feature; do not create a
+competing design folder or task catalog. Resolve consequential design choices
+before approval; this does not authorize implementation or replace the
+feature's agreed scope.
 
 #### SaaS and multi-tenant impact
 
